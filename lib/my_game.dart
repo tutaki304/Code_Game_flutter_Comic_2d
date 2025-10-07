@@ -4,7 +4,7 @@ import 'dart:math'; // Các hàm toán học (Random, sin, cos...)
 
 // Import các component game tự tạo
 import 'package:cosmic_havoc/components/asteroid.dart'; // Thiên thạch trong game
-import 'package:cosmic_havoc/components/audio_manager.dart'; // Quản lý âm thanh
+import 'package:cosmic_havoc/components/audio_manager.dart'; // Quản lý âm thanh với flutter_soloud
 import 'package:cosmic_havoc/components/pickup.dart'; // Vật phẩm thu thập
 import 'package:cosmic_havoc/components/player.dart'; // Tàu người chơi
 import 'package:cosmic_havoc/components/shoot_button.dart'; // Nút bắn
