@@ -36,6 +36,7 @@ class MyGame extends FlameGame
   // Hệ thống điểm số
   int _score = 0; // Điểm hiện tại
   late TextComponent _scoreDisplay; // Component hiển thị điểm
+  late TextComponent _laserLevelDisplay; // Component hiển thị laser level
 
   // Hệ thống chọn màu tàu
   final List<String> playerColors = [
@@ -61,7 +62,7 @@ class MyGame extends FlameGame
     // Khởi tạo và thêm audio manager vào game
     audioManager = AudioManager(); // Tạo đối tượng quản lý âm thanh
     await add(audioManager); // Thêm vào game world
-    audioManager.playMusic(); // Bắt đầu phát nhạc nền
+    // audioManager.playMusic(); // Bắt đầu phát nhạc nền - tạm disable để tránh crash
 
     // Tạo các ngôi sao làm background
     _createStars();
@@ -77,6 +78,8 @@ class MyGame extends FlameGame
     _createAsteroidSpawner(); // Tạo bộ sinh thiên thạch
     _createPickupSpawner(); // Tạo bộ sinh vật phẩm
     _createScoreDisplay(); // Tạo hiển thị điểm số
+    _createLaserLevelDisplay(); // Tạo hiển thị laser level
+    _showDeviceInfo(); // Hiển thị thông tin thiết bị (debug)
   }
 
   // Hàm tạo tàu người chơi
@@ -89,27 +92,51 @@ class MyGame extends FlameGame
   }
 
   Future<void> _createJoystick() async {
+    // 📱 Adaptive UI: Tự động điều chỉnh theo thiết bị
+    final isPhone =
+        size.y > size.x; // Portrait = Phone, Landscape = Desktop/Tablet
+
+    // Size và margin tùy theo thiết bị
+    final joystickSizePercent =
+        isPhone ? 0.20 : 0.12; // Phone lớn hơn để dễ chạm
+    final marginPercent = isPhone ? 0.08 : 0.04; // Phone cần margin lớn hơn
+
+    final joystickSize = Vector2.all(size.x * joystickSizePercent);
+    final knobSize = joystickSize * 0.6; // Knob chiếm 60% background
+    final margin = size.x * marginPercent;
+
     joystick = JoystickComponent(
       knob: SpriteComponent(
         sprite: await loadSprite('joystick_knob.png'),
-        size: Vector2.all(50),
+        size: knobSize,
       ),
       background: SpriteComponent(
         sprite: await loadSprite('joystick_background.png'),
-        size: Vector2.all(100),
+        size: joystickSize,
       ),
       anchor: Anchor.bottomLeft,
-      position: Vector2(20, size.y - 20),
+      position: Vector2(margin, size.y - margin),
       priority: 10,
     );
     add(joystick);
   }
 
   void _createShootButton() {
+    // 📱 Adaptive shoot button
+    final isPhone = size.y > size.x;
+    final marginPercent = isPhone ? 0.08 : 0.04; // Phone cần margin lớn hơn
+    final margin = size.x * marginPercent;
+
     _shootButton = ShootButton()
       ..anchor = Anchor.bottomRight
-      ..position = Vector2(size.x - 20, size.y - 20)
+      ..position = Vector2(size.x - margin, size.y - margin)
       ..priority = 10;
+
+    // Phone cần button lớn hơn để dễ chạm
+    if (isPhone) {
+      _shootButton.scale = Vector2.all(1.2);
+    }
+
     add(_shootButton);
   }
 
@@ -147,21 +174,32 @@ class MyGame extends FlameGame
   void _createScoreDisplay() {
     _score = 0;
 
+    // 📱 Adaptive score display
+    final isPhone = size.y > size.x;
+
+    // Điều chỉnh margin và font cho từng thiết bị
+    final topMarginPercent = isPhone ? 0.08 : 0.04; // Phone tránh notch/camera
+    final fontSizePercent = isPhone ? 0.10 : 0.06; // Phone cần font lớn hơn
+
+    final topMargin = size.y * topMarginPercent;
+    final fontSize = size.x * fontSizePercent;
+
     _scoreDisplay = TextComponent(
       text: '0',
       anchor: Anchor.topCenter,
-      position: Vector2(size.x / 2, 20),
+      position: Vector2(size.x / 2, topMargin),
       priority: 10,
       textRenderer: TextPaint(
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.white,
-          fontSize: 48,
+          fontSize: fontSize,
           fontWeight: FontWeight.bold,
           shadows: [
             Shadow(
               color: Colors.black,
-              offset: Offset(2, 2),
-              blurRadius: 2,
+              offset: Offset(fontSize * 0.05,
+                  fontSize * 0.05), // Shadow proportional to font size
+              blurRadius: fontSize * 0.05,
             ),
           ],
         ),
@@ -169,6 +207,104 @@ class MyGame extends FlameGame
     );
 
     add(_scoreDisplay);
+  }
+
+  void _createLaserLevelDisplay() {
+    // 📱 Adaptive laser level display
+    final isPhone = size.y > size.x;
+
+    // Điều chỉnh size và position cho từng thiết bị
+    final topMarginPercent = isPhone ? 0.08 : 0.04; // Đồng bộ với score
+    final fontSizePercent = isPhone ? 0.06 : 0.04; // Phone cần font lớn hơn
+    final sideMarginPercent = isPhone ? 0.08 : 0.04; // Phone cần margin lớn hơn
+
+    final topMargin = size.y * topMarginPercent;
+    final fontSize = size.x * fontSizePercent;
+    final sideMargin = size.x * sideMarginPercent;
+
+    // 🎯 Position thông minh: Phone để bên trái, Desktop để bên phải
+    final anchor = isPhone ? Anchor.topLeft : Anchor.topRight;
+    final positionX = isPhone ? sideMargin : (size.x - sideMargin);
+
+    _laserLevelDisplay = TextComponent(
+      text: 'LASER LV.1',
+      anchor: anchor,
+      position: Vector2(positionX, topMargin),
+      priority: 10,
+      textRenderer: TextPaint(
+        style: TextStyle(
+          color: Colors.cyan,
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          shadows: [
+            Shadow(
+              color: Colors.black,
+              offset: Offset(fontSize * 0.05, fontSize * 0.05),
+              blurRadius: fontSize * 0.05,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    add(_laserLevelDisplay);
+  }
+
+  void _showDeviceInfo() {
+    // 🔍 Debug: Hiển thị thông tin thiết bị và UI layout
+    final isPhone = size.y > size.x;
+    String deviceType;
+    String layoutInfo;
+
+    if (isPhone) {
+      deviceType = '📱 PHONE UI';
+      layoutInfo = 'Portrait Mode - Laser Level: Top Left';
+    } else {
+      if (size.x < 1200) {
+        deviceType = '📚 TABLET UI';
+      } else {
+        deviceType = '🖥️ DESKTOP UI';
+      }
+      layoutInfo = 'Landscape Mode - Laser Level: Top Right';
+    }
+
+    final infoText = TextComponent(
+      text:
+          '$deviceType\nSize: ${size.x.toInt()}x${size.y.toInt()}\n$layoutInfo',
+      anchor: Anchor.bottomCenter,
+      position: Vector2(size.x / 2, size.y - 15),
+      priority: 15,
+      textRenderer: TextPaint(
+        style: TextStyle(
+          color: Colors.yellow.withOpacity(0.8),
+          fontSize: isPhone ? 14 : 12,
+          fontWeight: FontWeight.normal,
+        ),
+      ),
+    );
+
+    add(infoText);
+
+    // Tự động ẩn sau 4 giây
+    Timer deviceInfoTimer = Timer(4.0, onTick: () {
+      remove(infoText);
+    });
+    deviceInfoTimer.start();
+  }
+
+  void updateLaserLevelDisplay(int level) {
+    _laserLevelDisplay.text = 'LASER LV.$level';
+
+    // Hiệu ứng nhấp nháy khi nâng cấp
+    final glowEffect = ScaleEffect.to(
+      Vector2.all(1.3),
+      EffectController(
+        duration: 0.15,
+        alternate: true,
+        curve: Curves.easeInOut,
+      ),
+    );
+    _laserLevelDisplay.add(glowEffect);
   }
 
   void incrementScore(int amount) {
@@ -199,20 +335,23 @@ class MyGame extends FlameGame
   }
 
   void restartGame() {
-    // remove any asteroids and pickups that are currently in the game
+    // Xóa tất cả asteroids và pickups hiện tại trong game
     children.whereType<PositionComponent>().forEach((component) {
       if (component is Asteroid || component is Pickup) {
         remove(component);
       }
     });
 
-    // reset the asteroid and pickup spawners
+    // Reset spawners cho asteroids và pickups
     _asteroidSpawner.timer.start();
     _pickupSpawner.timer.start();
 
-    // reset the score to 0
+    // Reset điểm về 0
     _score = 0;
     _scoreDisplay.text = '0';
+
+    // Reset hiển thị level laser về level 1
+    _laserLevelDisplay.text = 'LASER LV.1';
 
     // create a new player sprite
     _createPlayer();
@@ -221,7 +360,7 @@ class MyGame extends FlameGame
   }
 
   void quitGame() {
-    // remove everything from the game except the stars
+    // Xóa mọi thứ trong game trừ stars
     children.whereType<PositionComponent>().forEach((component) {
       if (component is! Star) {
         remove(component);
@@ -231,7 +370,7 @@ class MyGame extends FlameGame
     remove(_asteroidSpawner);
     remove(_pickupSpawner);
 
-    // show the title overlay
+    // Hiển thị title overlay
     overlays.add('Title');
 
     resumeEngine();

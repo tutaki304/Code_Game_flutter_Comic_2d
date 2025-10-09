@@ -1,7 +1,7 @@
 // Thư viện Dart cơ bản
 import 'dart:async'; // Async/await cho hàm bất đồng bộ
 import 'dart:math'; // Hàm toán học (Random, sin, cos...)
-import 'dart:ui'; // Primitive UI operations
+import 'dart:ui'; // Các thao tác UI cơ bản
 
 // Import các component game khác
 import 'package:cosmic_havoc/components/asteroid.dart'; // Thiên thạch (để xử lý va chạm)
@@ -41,7 +41,11 @@ class Player
 
   // Timer cho các hiệu ứng
   late Timer _explosionTimer; // Timer tạo nổ khi tàu bị phá hủy
-  late Timer _laserPowerupTimer; // Timer đếm thời gian laser power-up
+
+  // 🚀 HỆ THỐNG LASER NÂNG CẤP
+  int _laserLevel = 1; // Level laser hiện tại (1-10)
+  static const int maxLaserLevel = 10; // Level tối đa
+  static const double laserSpacing = 20.0; // Khoảng cách giữa laser song song
 
   // Hệ thống bảo vệ
   Shield? activeShield; // Khiên hiện tại (null = không có khiên)
@@ -54,11 +58,6 @@ class Player
       0.1,
       onTick: _createRandomExplosion,
       repeat: true,
-      autoStart: false,
-    );
-
-    _laserPowerupTimer = Timer(
-      10.0,
       autoStart: false,
     );
   }
@@ -89,17 +88,15 @@ class Player
       return;
     }
 
-    if (_laserPowerupTimer.isRunning()) {
-      _laserPowerupTimer.update(dt);
-    }
+    // Laser level giờ là permanent, không cần timer
 
-    // combine the joystick input with the keyboard movement
+    // Kết hợp input từ joystick và bàn phím
     final Vector2 movement = game.joystick.relativeDelta + _keyboardMovement;
     position += movement.normalized() * 200 * dt;
 
     _handleScreenBounds();
 
-    // perform the shooting logic
+    // Xử lý logic bắn súng
     _elapsedFireTime += dt;
     if (_isShooting && _elapsedFireTime >= _fireCooldown) {
       _fireLaser();
@@ -122,14 +119,14 @@ class Player
     final double screenWidth = game.size.x;
     final double screenHeight = game.size.y;
 
-    // prevent the player from going off the top or bottom edges
+    // Ngăn player đi ra ngoài viền trên và dưới màn hình
     position.y = clampDouble(
       position.y,
       size.y / 2,
       screenHeight - size.y / 2,
     );
 
-    // perform wraparound if the player goes over the left or right edge
+    // Thực hiện wraparound khi player đi qua viền trái hoặc phải
     if (position.x < 0) {
       position.x = screenWidth;
     } else if (position.x > screenWidth) {
@@ -146,27 +143,72 @@ class Player
   }
 
   void _fireLaser() {
-    game.audioManager.playSound('laser');
+    // 🎵 Tối ưu: Chỉ phát âm thanh khi bắt đầu bắn để tránh spam
+    if (_elapsedFireTime == 0.0) {
+      game.audioManager.playSound('laser');
+    }
 
-    game.add(
-      Laser(position: position.clone() + Vector2(0, -size.y / 2)),
-    );
+    // 🚀 Bắn laser theo level hiện tại
+    _fireLasersByLevel();
+  }
 
-    if (_laserPowerupTimer.isRunning()) {
-      game.add(
-        Laser(
-          position: position.clone() + Vector2(0, -size.y / 2),
-          angle: 15 * degrees2Radians,
-        ),
-      );
-      game.add(
-        Laser(
-          position: position.clone() + Vector2(0, -size.y / 2),
-          angle: -15 * degrees2Radians,
-        ),
-      );
+  // 🎯 Bắn laser theo level - TỐI ƯU HIỆU NĂNG
+  void _fireLasersByLevel() {
+    final Vector2 basePosition = position.clone() + Vector2(0, -size.y / 2);
+
+    if (_laserLevel == 1) {
+      // Level 1: 1 tia thẳng
+      _createOptimizedLaser(basePosition, 0.0);
+    } else if (_laserLevel == 2) {
+      // Level 2: 2 tia song song
+      _createOptimizedLaser(basePosition + Vector2(-laserSpacing / 2, 0), 0.0);
+      _createOptimizedLaser(basePosition + Vector2(laserSpacing / 2, 0), 0.0);
+    } else {
+      // Level 3-10: Tỏa ra với góc đều
+      final int numLasers = _laserLevel.clamp(3, maxLaserLevel);
+      final double totalSpread = 60.0 * degrees2Radians; // 60 độ tổng
+      final double angleStep = totalSpread / (numLasers - 1);
+
+      for (int i = 0; i < numLasers; i++) {
+        final double angle = -totalSpread / 2 + i * angleStep;
+        _createOptimizedLaser(basePosition, angle);
+      }
     }
   }
+
+  // ⚡ Tối ưu: Tạo laser với ít object allocation
+  void _createOptimizedLaser(Vector2 pos, double angle) {
+    game.add(Laser(
+      position: pos,
+      angle: angle,
+    ));
+  }
+
+  // 🆙 Nâng cấp laser level
+  void _upgradeLaserLevel() {
+    if (_laserLevel < maxLaserLevel) {
+      _laserLevel++;
+      print('🚀 Laser upgraded to Level $_laserLevel!');
+
+      // Hiệu ứng visual cho upgrade (optional)
+      _showUpgradeEffect();
+    } else {
+      print('⭐ Laser đã đạt level tối đa!');
+      // Thay vì nâng cấp, có thể thêm bonus khác (damage, speed, etc.)
+    }
+  }
+
+  // ✨ Hiệu ứng upgrade laser
+  void _showUpgradeEffect() {
+    // Thêm hiệu ứng sáng tạm thời
+    add(ColorEffect(
+      const Color.fromRGBO(255, 255, 0, 0.5), // Màu vàng
+      EffectController(duration: 0.3),
+    ));
+  }
+
+  // 📊 Getter cho laser level (để UI hiển thị)
+  int get laserLevel => _laserLevel;
 
   void _handleDestruction() async {
     animation = SpriteAnimation.spriteList(
@@ -235,7 +277,8 @@ class Player
 
       switch (other.pickupType) {
         case PickupType.laser:
-          _laserPowerupTimer.start();
+          // 🚀 Nâng cấp laser level (không giảm tốc độ bắn)
+          _upgradeLaserLevel();
           break;
         case PickupType.bomb:
           game.add(Bomb(position: position.clone()));
@@ -253,7 +296,7 @@ class Player
 
   @override
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    // Reset movement vector
+    // Reset vector di chuyển
     _keyboardMovement.setZero();
 
     // ===== DI CHUYỂN NGANG (Trái/Phải) =====
