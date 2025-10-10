@@ -1,28 +1,28 @@
-import 'dart:math'; // Random number generation
+import 'dart:math'; // Tạo số ngẫu nhiên
 
-import 'package:cosmic_havoc/my_game.dart'; // Game instance access
+import 'package:cosmic_havoc/my_game.dart'; // Truy cập game instance
 import 'package:flame/components.dart'; // Flame components
 import 'package:flutter/widgets.dart'; // Flutter Color class
 
 /**
- * Star - Background star component cho parallax scrolling effect
+ * Star - Component star nền cho hiệu ứng parallax scrolling
  * 
  * 🌟 CHỨC NĂNG CHÍNH:
- * - Tạo background stars với different sizes (1-3px)
- * - Parallax scrolling: Bigger stars = faster movement
- * - Infinite loop: Stars wrap from bottom to top
- * - Alpha transparency: Based on size (bigger = more opaque)
+ * - Tạo background stars với các kích thước khác nhau (1-3px)
+ * - Parallax scrolling: Sao lớn hơn = di chuyển nhanh hơn
+ * - Vòng lặp vô tận: Sao wrap từ dưới lên trên
+ * - Alpha trong suốt: Dựa trên kích thước (lớn hơn = mờ đục hơn)
  * 
- * 🎨 VISUAL PROPERTIES:
- * - Size: Random 1-3 pixels
- * - Color: White với variable opacity
- * - Speed: Proportional to size (bigger stars fall faster)
- * - Position: Random across screen width
+ * 🎨 THUỘC TÍNH VISUAL:
+ * - Kích thước: Ngẫu nhiên 1-3 pixels
+ * - Màu sắc: Trắng với độ mờ đục khác nhau
+ * - Tốc độ: Tỷ lệ với kích thước (sao lớn rơi nhanh hơn)
+ * - Vị trí: Ngẫu nhiên trên chiều rộng màn hình
  * 
- * 🔄 BEHAVIOR:
- * - Continuous downward movement
- * - Wraparound when reaching bottom edge
- * - Random repositioning on X-axis after wrap
+ * 🔄 HÀNH VI:
+ * - Di chuyển xuống liên tục
+ * - Wraparound khi đến cạnh dưới
+ * - Tái định vị ngẫu nhiên trên trục X sau khi wrap
  */
 class Star extends CircleComponent with HasGameReference<MyGame> {
   // ===============================================
@@ -31,8 +31,9 @@ class Star extends CircleComponent with HasGameReference<MyGame> {
 
   final Random _random =
       Random(); // Random generator cho kích thước, vị trí, tốc độ
-  final int _maxSize = 3; // Max star size (pixels) - defines size range 1-3
-  late double _speed; // Fall speed (pixels/second) - calculated from size
+  final int _maxSize =
+      3; // Kích thước star tối đa (pixels) - định nghĩa range 1-3
+  late double _speed; // Tốc độ rơi (pixels/giây) - tính từ size
 
   // ===============================================
   // 🔄 LIFECYCLE METHODS
@@ -51,7 +52,7 @@ class Star extends CircleComponent with HasGameReference<MyGame> {
   Future<void> onLoad() {
     // ===== RANDOM SIZE GENERATION =====
     size =
-        Vector2.all(1.0 + _random.nextInt(_maxSize)); // Size range: 1-3 pixels
+        Vector2.all(1.0 + _random.nextInt(_maxSize)); // Kích thước: 1-3 pixels
 
     // ===== RANDOM INITIAL POSITION =====
     position = Vector2(
@@ -60,62 +61,63 @@ class Star extends CircleComponent with HasGameReference<MyGame> {
     );
 
     // ===== PARALLAX SPEED CALCULATION =====
-    // Bigger stars fall faster (creates depth illusion)
-    _speed = size.x * (40 + _random.nextInt(10)); // Speed = size * (40-49)
+    // Sao lớn hơn rơi nhanh hơn (tạo hiệu ứng chiều sâu)
+    _speed = size.x * (40 + _random.nextInt(10)); // Tốc độ = size * (40-49)
 
     // ===== TRANSPARENCY BASED ON SIZE =====
-    // Bigger stars = more opaque (alpha = size / maxSize)
+    // Sao lớn hơn = mờ đục hơn (alpha = size / maxSize)
     paint.color = Color.fromRGBO(255, 255, 255, size.x / _maxSize);
 
     return super.onLoad();
   }
 
   /**
-   * update() - Update star position mỗi frame
+   * update() - Cập nhật vị trí star mỗi frame
    * 
-   * Movement logic:
-   * 1. Move star downward với calculated speed
-   * 2. Check screen bounds (bottom edge)
-   * 3. Wraparound: Reset to top với new random X position
+   * Logic di chuyển:
+   * 1. Di chuyển star xuống dưới với tốc độ đã tính
+   * 2. Kiểm tra ranh giới màn hình (cạnh dưới)
+   * 3. Wraparound: Reset về trên với vị trí X ngẫu nhiên mới
    * 
-   * Parallax effect: Different sized stars move at different speeds
+   * Hiệu ứng Parallax: Các star khác size di chuyển với tốc độ khác nhau
    */
   @override
   void update(double dt) {
     super.update(dt);
 
     // ===== DOWNWARD MOVEMENT =====
-    position.y += _speed * dt; // Move down với parallax speed
+    position.y += _speed * dt; // Di chuyển xuống với tốc độ parallax
 
     // ===== SCREEN WRAPAROUND =====
     // Khi star đi qua bottom edge của screen
     if (position.y > game.size.y + size.y / 2) {
       position.y = -size.y / 2; // Reset về đầu màn hình
-      position.x = _random.nextDouble() * game.size.x; // New random X position
+      position.x =
+          _random.nextDouble() * game.size.x; // Vị trí X ngẫu nhiên mới
     }
   }
 }
 
 // ===============================================
-// 📝 IMPLEMENTATION NOTES
+// 📝 GHI CHÚ TRIỂN KHAI
 // ===============================================
 //
-// 🌟 PARALLAX SCROLLING THEORY:
-// - Smaller stars (1px) = slower speed = background layer
-// - Bigger stars (3px) = faster speed = foreground layer
-// - Creates illusion of depth và movement
+// 🌟 LÝ THUYẾT PARALLAX SCROLLING:
+// - Sao nhỏ hơn (1px) = tốc độ chậm hơn = lớp nền
+// - Sao lớn hơn (3px) = tốc độ nhanh hơn = lớp tiền cảnh
+// - Tạo ảo giác về chiều sâu và chuyển động
 //
-// 🎨 VISUAL DESIGN:
-// - White stars với variable transparency
-// - Alpha based on size: bigger = more visible
-// - Smooth continuous movement
+// 🎨 THIẾT KẾ VISUAL:
+// - Sao trắng với độ trong suốt khác nhau
+// - Alpha dựa trên kích thước: lớn hơn = dễ thấy hơn
+// - Chuyển động liên tục mượt mà
 //
-// 🔄 INFINITE LOOP:
-// - Stars continuously cycle from top to bottom
-// - Random X repositioning prevents patterns
-// - Seamless background animation
+// 🔄 VÒNG LẶP VÔ TẬN:
+// - Sao liên tục quay vòng từ trên xuống dưới
+// - Tái định vị X ngẫu nhiên tránh tạo pattern
+// - Animation nền liền mạch
 //
-// 📱 PERFORMANCE:
-// - Lightweight CircleComponent (minimal overhead)
-// - Simple update logic (just Y movement)
-// - No collision detection needed
+// 📱 HIỆU SUẤT:
+// - CircleComponent nhẹ (overhead tối thiểu)
+// - Logic update đơn giản (chỉ di chuyển Y)
+// - Không cần phát hiện va chạm

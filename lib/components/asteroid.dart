@@ -1,4 +1,4 @@
-import 'dart:async'; // Async/await support
+import 'dart:async'; // Hỗ trợ Async/await
 import 'dart:math'; // Toán học (Random, etc.)
 
 import 'package:cosmic_havoc/components/explosion.dart'; // Hiệu ứng nổ khi asteroid bị phá hủy
@@ -9,32 +9,32 @@ import 'package:flame/effects.dart'; // Hiệu ứng animation
 import 'package:flutter/widgets.dart'; // Flutter widgets
 
 /**
- * Asteroid - Destructible space rocks (game enemies)
+ * Asteroid - Tảng đá không gian có thể phá hủy (kẻ thù trong game)
  * 
  * 🪨 CHỨC NĂNG CHÍNH:
- * - Moving obstacles với random velocity và spin
- * - Multi-hit system: 3 health points, visual feedback
- * - Collision với Player (game over) và Laser (damage)
- * - Splitting mechanic: Large asteroids → 3 smaller fragments
- * - Score system: +1 per hit, +2 bonus for destruction
+ * - Chướng ngại vật di chuyển với velocity và xoay ngẫu nhiên
+ * - Hệ thống nhiều hit: 3 điểm máu, phản hồi visual
+ * - Va chạm với Player (game over) và Laser (damage)
+ * - Cơ chế tách: Asteroid lớn → 3 mảnh nhỏ hơn
+ * - Hệ thống điểm: +1 mỗi hit, +2 bonus khi phá hủy
  * 
- * 🎯 GAMEPLAY MECHANICS:
- * - Screen wrapping: Left/right edges wrap around
- * - Bottom cleanup: Auto-remove khi ra khỏi screen
- * - Knockback effect: Pushed backward when hit
- * - Size-based scaling: Smaller = faster, less health
+ * 🎯 CƠ CHẾ GAMEPLAY:
+ * - Wrap màn hình: Cạnh trái/phải wrap qua lại
+ * - Dọn dẹp dưới: Tự động xóa khi ra khỏi màn hình
+ * - Hiệu ứng knockback: Bị đẩy lùi khi trúng đòn
+ * - Scale theo kích thước: Nhỏ hơn = nhanh hơn, ít máu hơn
  * 
- * 💥 DESTRUCTION SEQUENCE:
- * 1. Explosion effect (dust particles)
- * 2. Score bonus (+2 points)
- * 3. Split into 3 smaller fragments (if large enough)
- * 4. Audio feedback (explosion sound)
+ * 💥 CHUỖI PHÁ HỦY:
+ * 1. Hiệu ứng nổ (particle bụi)
+ * 2. Bonus điểm (+2 điểm)
+ * 3. Tách thành 3 mảnh nhỏ hơn (nếu đủ lớn)
+ * 4. Phản hồi âm thanh (tiếng nổ)
  * 
- * 🎨 VISUAL EFFECTS:
- * - Random sprite selection (3 variants)
- * - White flash on damage
- * - Continuous rotation animation
- * - Scale-based movement (smaller = faster)
+ * 🎨 HIỆU ỨNG VISUAL:
+ * - Chọn sprite ngẫu nhiên (3 biến thể)
+ * - Nhấp nháy trắng khi bị damage
+ * - Animation xoay liên tục
+ * - Di chuyển theo scale (nhỏ hơn = nhanh hơn)
  */
 class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
     with
@@ -90,21 +90,22 @@ class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
    */
   Asteroid({required super.position, double size = _maxSize})
       : super(
-          size: Vector2.all(size), // Square size (width = height)
-          anchor: Anchor.center, // Center anchor for rotation
-          priority: -1, // Behind player, above background
+          size: Vector2.all(size), // Kích thước vuông (rộng = cao)
+          anchor: Anchor.center, // Điểm neo giữa cho xoay
+          priority: -1, // Phía sau player, trước background
         ) {
     // ===== MOVEMENT INITIALIZATION =====
-    _velocity = _generateVelocity(); // Calculate random velocity based on size
+    _velocity =
+        _generateVelocity(); // Tính toán velocity ngẫu nhiên dựa trên size
     _originalVelocity
-        .setFrom(_velocity); // Store original for knockback recovery
+        .setFrom(_velocity); // Lưu trữ ban đầu cho knockback recovery
 
     // ===== VISUAL EFFECTS =====
     _spinSpeed = _random.nextDouble() * 1.5 -
         0.75; // Xoay ngẫu nhiên: -0.75 đến +0.75 rad/s
 
     // ===== HEALTH SCALING =====
-    _health = size / _maxSize * _maxHealth; // Smaller asteroids = less health
+    _health = size / _maxSize * _maxHealth; // Asteroid nhỏ hơn = ít máu hơn
 
     // ===== COLLISION SETUP =====
     add(CircleHitbox(
@@ -117,41 +118,41 @@ class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
   // ===============================================
 
   /**
-   * onLoad() - Load random asteroid sprite
+   * onLoad() - Load sprite asteroid ngẫu nhiên
    * 
-   * Visual variety: 3 different asteroid sprites
+   * Đa dạng visual: 3 sprite asteroid khác nhau
    * - asteroid1.png, asteroid2.png, asteroid3.png
-   * - Random selection cho visual diversity
+   * - Chọn ngẫu nhiên để đa dạng visual
    */
   @override
   FutureOr<void> onLoad() async {
     // ===== RANDOM SPRITE SELECTION =====
-    final int imageNum = _random.nextInt(3) + 1; // Random 1-3
+    final int imageNum = _random.nextInt(3) + 1; // Ngẫu nhiên 1-3
     sprite = await game.loadSprite('asteroid$imageNum.png');
 
     return super.onLoad();
   }
 
   /**
-   * update() - Update asteroid position và rotation mỗi frame
+   * update() - Cập nhật vị trí và xoay asteroid mỗi frame
    * 
-   * Update sequence:
-   * 1. Apply velocity to position
-   * 2. Handle screen boundary wrapping/cleanup
-   * 3. Apply spin rotation
+   * Chuỗi cập nhật:
+   * 1. Áp dụng velocity cho vị trí
+   * 2. Xử lý wrap/cleanup ranh giới màn hình
+   * 3. Áp dụng xoay quay
    */
   @override
   void update(double dt) {
     super.update(dt);
 
     // ===== MOVEMENT UPDATE =====
-    position += _velocity * dt; // Apply velocity (pixels/second)
+    position += _velocity * dt; // Áp dụng velocity (pixels/giây)
 
     // ===== BOUNDARY HANDLING =====
-    _handleScreenBounds(); // Wrap horizontally, cleanup vertically
+    _handleScreenBounds(); // Wrap ngang, cleanup dọc
 
     // ===== ROTATION ANIMATION =====
-    angle += _spinSpeed * dt; // Apply spin rotation
+    angle += _spinSpeed * dt; // Áp dụng xoay quay
   }
 
   // ===============================================
@@ -161,15 +162,15 @@ class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
   /**
    * _generateVelocity() - Calculate random velocity scaled by size
    * 
-   * Velocity calculation:
-   * 1. Base velocity: X random (-60 to +60), Y downward (100-150)
-   * 2. Force factor: Smaller asteroids move faster
-   * 3. Final velocity = base * force factor
+   * Tính toán velocity:
+   * 1. Velocity cơ bản: X ngẫu nhiên (-60 đến +60), Y xuống dưới (100-150)
+   * 2. Hệ số lực: Asteroid nhỏ hơn di chuyển nhanh hơn
+   * 3. Velocity cuối = cơ bản * hệ số lực
    * 
-   * Size scaling logic: forceFactor = maxSize / currentSize
-   * - Large asteroid (120px): factor = 1.0 (normal speed)
-   * - Medium asteroid (80px): factor = 1.5 (faster)
-   * - Small asteroid (40px): factor = 3.0 (much faster)
+   * Logic scale kích thước: forceFactor = kích thước tối đa / kích thước hiện tại
+   * - Asteroid lớn (120px): hệ số = 1.0 (tốc độ bình thường)
+   * - Asteroid trung (80px): hệ số = 1.5 (nhanh hơn)
+   * - Asteroid nhỏ (40px): hệ số = 3.0 (nhanh nhiều)
    */
   Vector2 _generateVelocity() {
     final double forceFactor = _maxSize / size.x; // Càng nhỏ = factor càng cao
@@ -179,26 +180,26 @@ class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
           _random.nextDouble() * 120 - 60, // X: Random ngang (-60 đến +60)
           100 + _random.nextDouble() * 50, // Y: Xuống dưới (100 đến 150)
         ) *
-        forceFactor; // Scale by size (smaller = faster)
+        forceFactor; // Scale theo size (nhỏ hơn = nhanh hơn)
   }
 
   /**
-   * _handleScreenBounds() - Handle screen edge behavior
+   * _handleScreenBounds() - Xử lý hành vi cạnh màn hình
    * 
-   * Boundary behaviors:
-   * - Bottom edge: Remove asteroid (cleanup)
-   * - Left/Right edges: Wraparound (continuous gameplay)
-   * - Top edge: No handling (asteroids spawn from top)
+   * Hành vi biên:
+   * - Cạnh dưới: Loại bỏ asteroid (dọn dẹp)
+   * - Cạnh trái/phải: Wrap qua lại (gameplay liên tục)
+   * - Cạnh trên: Không xử lý (asteroid spawn từ trên)
    */
   void _handleScreenBounds() {
     // ===== BOTTOM CLEANUP =====
     // Xóa asteroid khi đi qua bottom edge (không còn thấy được)
     if (position.y > game.size.y + size.y / 2) {
-      removeFromParent(); // Clean up memory
+      removeFromParent(); // Dọn dẹp bộ nhớ
     }
 
     // ===== HORIZONTAL WRAPAROUND =====
-    // Wrap left/right edges để continuous gameplay
+    // Wrap cạnh trái/phải để gameplay liên tục
     final double screenWidth = game.size.x;
     if (position.x < -size.x / 2) {
       position.x = screenWidth + size.x / 2; // Wrap từ trái sang phải
@@ -212,42 +213,42 @@ class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
   // ===============================================
 
   /**
-   * takeDamage() - Handle laser hit với complete damage sequence
+   * takeDamage() - Xử lý laser đánh trúng với chuỗi damage hoàn chỉnh
    * 
-   * Damage sequence:
-   * 1. Play hit sound effect
-   * 2. Reduce health by 1
-   * 3a. If health <= 0: DESTRUCTION
-   *     - Award +2 bonus points
-   *     - Remove from game
-   *     - Create explosion effect  
-   *     - Split into smaller fragments
-   * 3b. If still alive: DAMAGE FEEDBACK
-   *     - Award +1 hit point
-   *     - White flash effect
-   *     - Knockback push effect
+   * Chuỗi damage:
+   * 1. Phát âm thanh đánh trúng
+   * 2. Giảm health xuống 1
+   * 3a. Nếu health <= 0: PHÁ HỦY
+   *     - Thưởng +2 điểm bonus
+   *     - Loại bỏ khỏi game
+   *     - Tạo hiệu ứng nổ
+   *     - Tách thành các mảnh nhỏ hơn
+   * 3b. Nếu vẫn sống: PHẢN HỒI DAMAGE
+   *     - Thưởng +1 điểm đánh trúng
+   *     - Hiệu ứng flash trắng
+   *     - Hiệu ứng đẩy lùi
    * 
-   * Called by: Laser.onCollision() khi laser hits asteroid
+   * Được gọi bởi: Laser.onCollision() khi laser trúng asteroid
    */
   void takeDamage() {
     // ===== AUDIO FEEDBACK =====
-    game.audioManager.playSound('hit'); // Immediate audio feedback
+    game.audioManager.playSound('hit'); // Phản hồi âm thanh ngay lập tức
 
     // ===== HEALTH REDUCTION =====
-    _health--; // Reduce health by 1
+    _health--; // Giảm máu xuống 1
 
     // ===== DESTRUCTION vs DAMAGE =====
     if (_health <= 0) {
       // ===== DESTRUCTION SEQUENCE =====
-      game.incrementScore(2); // Bonus points for destruction
-      removeFromParent(); // Remove asteroid from game
-      _createExplosion(); // Visual explosion effect
+      game.incrementScore(2); // Điểm thưởng cho việc phá hủy
+      removeFromParent(); // Xóa asteroid khỏi game
+      _createExplosion(); // Hiệu ứng nổ
       _splitAsteroid(); // Tách thành các mảnh nhỏ hơn (nếu đủ lớn)
     } else {
       // ===== DAMAGE FEEDBACK SEQUENCE =====
-      game.incrementScore(1); // Hit points (per laser hit)
-      _flashWhite(); // Visual damage feedback
-      _applyKnockback(); // Push asteroid backward
+      game.incrementScore(1); // Điểm trúng (mỗi lần laser hit)
+      _flashWhite(); // Phản hồi visual damage
+      _applyKnockback(); // Đẩy asteroid về phía sau
     }
   }
 
@@ -256,69 +257,69 @@ class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
   // ===============================================
 
   /**
-   * _flashWhite() - White flash effect khi bị damage
+   * _flashWhite() - Hiệu ứng flash trắng khi bị damage
    * 
-   * Effect properties:
-   * - Color: Pure white (RGB 255,255,255)
-   * - Duration: 0.1s flash
-   * - Alternate: Flash to white then back to normal
-   * - Curve: Smooth easeInOut transition
+   * Thuộc tính hiệu ứng:
+   * - Màu: Trắng thuần (RGB 255,255,255)
+   * - Thời gian: 0.1s flash
+   * - Xen kẽ: Flash sang trắng rồi trở lại bình thường
+   * - Đường cong: Chuyển tiếp mượt easeInOut
    * 
-   * Visual feedback cho player biết laser hit thành công
+   * Phản hồi visual cho player biết laser hit thành công
    */
   void _flashWhite() {
     final ColorEffect flashEffect = ColorEffect(
-      const Color.fromRGBO(255, 255, 255, 1.0), // Pure white color
+      const Color.fromRGBO(255, 255, 255, 1.0), // Màu trắng tinh khiết
       EffectController(
-        duration: 0.1, // Quick flash (100ms)
+        duration: 0.1, // Nhấp nháy nhanh (100ms)
         alternate: true, // Nhấp nháy trắng rồi về lại
-        curve: Curves.easeInOut, // Smooth transition
+        curve: Curves.easeInOut, // Chuyển tiếp mượt mà
       ),
     );
     add(flashEffect); // Áp dụng hiệu ứng cho asteroid
   }
 
   /**
-   * _applyKnockback() - Push asteroid backward khi bị hit
+   * _applyKnockback() - Đẩy asteroid lùi khi bị hit
    * 
-   * Knockback sequence:
-   * 1. Check if already knocked back (prevent stacking)
-   * 2. Set knockback flag và stop current velocity
-   * 3. Apply upward push movement (-20 pixels)
-   * 4. Restore original velocity khi complete
+   * Chuỗi knockback:
+   * 1. Kiểm tra đã bị knockback chưa (ngăn chồng chất)
+   * 2. Đặt flag knockback và dừng velocity hiện tại
+   * 3. Áp dụng chuyển động đẩy lên (-20 pixels)
+   * 4. Khôi phục velocity gốc khi hoàn thành
    * 
-   * Provides satisfying physical feedback cho laser hits
+   * Cung cấp phản hồi vật lý hài lòng cho laser hits
    */
   void _applyKnockback() {
-    if (_isKnockedback) return; // Prevent multiple simultaneous knockbacks
+    if (_isKnockedback) return; // Ngăn nhiều knockback đồng thời
 
     // ===== KNOCKBACK STATE =====
-    _isKnockedback = true; // Set knockback flag
-    _velocity.setZero(); // Stop current movement
+    _isKnockedback = true; // Đặt flag knockback
+    _velocity.setZero(); // Dừng chuyển động hiện tại
 
     // ===== KNOCKBACK EFFECT =====
     final MoveByEffect knockbackEffect = MoveByEffect(
-      Vector2(0, -20), // Push upward 20 pixels
+      Vector2(0, -20), // Đẩy lên trên 20 pixels
       EffectController(
-        duration: 0.1, // Quick push (100ms)
+        duration: 0.1, // Đẩy nhanh (100ms)
       ),
       onComplete: _restoreVelocity, // Khôi phục chuyển động khi xong
     );
-    add(knockbackEffect); // Apply effect
+    add(knockbackEffect); // Áp dụng hiệu ứng
   }
 
   /**
-   * _restoreVelocity() - Restore normal movement sau knockback
+   * _restoreVelocity() - Khôi phục chuyển động bình thường sau knockback
    * 
-   * Recovery sequence:
-   * 1. Restore original velocity
-   * 2. Clear knockback flag
+   * Chuỗi phục hồi:
+   * 1. Khôi phục velocity gốc
+   * 2. Xóa flag knockback
    * 
-   * Called by: knockbackEffect.onComplete callback
+   * Được gọi bởi: knockbackEffect.onComplete callback
    */
   void _restoreVelocity() {
     _velocity.setFrom(_originalVelocity); // Khôi phục chuyển động ban đầu
-    _isKnockedback = false; // Clear knockback flag
+    _isKnockedback = false; // Xóa cờ knockback
   }
 
   void _createExplosion() {

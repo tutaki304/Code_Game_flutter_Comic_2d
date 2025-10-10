@@ -91,25 +91,25 @@ class _GameOverOverlayState extends State<GameOverOverlay> {
           widget.game.overlays.remove('GameOver'); // Tự động xóa overlay
         }
       },
-      opacity: _opacity, // Current opacity value
-      duration: const Duration(milliseconds: 500), // Animation duration
+      opacity: _opacity, // Giá trị opacity hiện tại
+      duration: const Duration(milliseconds: 500), // Thời lượng animation
 
       // ===== OVERLAY CONTAINER =====
       child: Container(
-        color: Colors.black.withAlpha(150), // Semi-transparent black background
-        alignment: Alignment.center, // Center all content
+        color: Colors.black.withAlpha(150), // Nền đen bán trong suốt
+        alignment: Alignment.center, // Căn giữa tất cả nội dung
 
         // ===== MAIN CONTENT COLUMN =====
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Center vertically
+          mainAxisAlignment: MainAxisAlignment.center, // Căn giữa theo dọc
           children: [
             // ===== GAME OVER TITLE =====
             const Text(
               'GAME OVER',
               style: TextStyle(
-                color: Colors.white, // White text cho contrast tốt
-                fontSize: 48, // Large font size để eye-catching
-                fontWeight: FontWeight.bold, // Bold để dramatic effect
+                color: Colors.white, // Chữ trắng để tương phản tốt
+                fontSize: 48, // Font size lớn để bắt mắt
+                fontWeight: FontWeight.bold, // Bold để hiệu ứng kịch tính
               ),
             ),
             const SizedBox(height: 30), // Khoảng cách giữa title và buttons

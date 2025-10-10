@@ -1,8 +1,8 @@
 import 'dart:async'; // Async/await support
 
-import 'package:cosmic_havoc/my_game.dart'; // Game instance access
+import 'package:cosmic_havoc/my_game.dart'; // Truy cập game instance
 import 'package:flame/components.dart'; // Flame components
-import 'package:flame/events.dart'; // Touch event handling
+import 'package:flame/events.dart'; // Xử lý sự kiện chạm
 
 /**
  * ShootButton - Touch control button cho mobile laser firing
@@ -92,7 +92,7 @@ class ShootButton extends SpriteComponent
     super.onTapDown(event);
 
     // ===== START CONTINUOUS FIRING =====
-    game.player.startShooting(); // Activate player shooting state
+    game.player.startShooting(); // Kích hoạt trạng thái bắn của player
   }
 
   /**

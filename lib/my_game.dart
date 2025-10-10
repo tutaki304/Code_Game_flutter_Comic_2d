@@ -198,7 +198,7 @@ class MyGame extends FlameGame
             Shadow(
               color: Colors.black,
               offset: Offset(fontSize * 0.05,
-                  fontSize * 0.05), // Shadow proportional to font size
+                  fontSize * 0.05), // Bóng tỷ lệ với kích thước font
               blurRadius: fontSize * 0.05,
             ),
           ],
@@ -353,7 +353,7 @@ class MyGame extends FlameGame
     // Reset hiển thị level laser về level 1
     _laserLevelDisplay.text = 'LASER LV.1';
 
-    // create a new player sprite
+    // Tạo sprite player mới
     _createPlayer();
 
     resumeEngine();
