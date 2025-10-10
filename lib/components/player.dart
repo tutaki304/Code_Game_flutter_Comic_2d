@@ -200,10 +200,13 @@ class Player
 
   // ✨ Hiệu ứng upgrade laser
   void _showUpgradeEffect() {
-    // Thêm hiệu ứng sáng tạm thời
-    add(ColorEffect(
-      const Color.fromRGBO(255, 255, 0, 0.5), // Màu vàng
-      EffectController(duration: 0.3),
+    // Sử dụng hiệu ứng scale thay vì đổi màu để tránh làm tàu chuyển sang màu khác
+    add(ScaleEffect.by(
+      Vector2.all(1.2), // Tăng kích thước 20%
+      EffectController(
+        duration: 0.15,
+        reverseDuration: 0.15, // Quay về kích thước ban đầu
+      ),
     ));
   }
 
