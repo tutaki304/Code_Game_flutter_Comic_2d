@@ -1,0 +1,111 @@
+name: Flutter CI/CD
+
+on:
+    push:
+        branches: [main, develop, feature/*, fix/*]
+    pull_request:
+        branches: [main, develop]
+
+jobs:
+    code_quality:
+        runs-on: ubuntu-latest
+        name: Code Quality Check
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Flutter
+              uses: subosito/flutter-action@v2
+              with:
+                  flutter-version: "3.24.3"
+                  channel: "stable"
+                  cache: true
+
+            - name: Install dependencies
+              run: flutter pub get
+
+            - name: Verify pub get
+              run: flutter pub deps
+
+            - name: Check code formatting
+              run: dart format --output=none --set-exit-if-changed .
+
+            - name: Analyze code
+              run: flutter analyze --fatal-infos
+
+            - name: Check project structure
+              run: |
+                  echo "Checking Flutter project structure..."
+                  chmod +x .github/scripts/check_structure.sh
+                  .github/scripts/check_structure.sh
+
+            - name: Run tests
+              run: flutter test --coverage
+
+            - name: Check for outdated dependencies
+              run: flutter pub outdated
+
+            - name: Upload coverage to Codecov
+              if: success()
+              uses: codecov/codecov-action@v3
+              with:
+                  file: coverage/lcov.info
+                  flags: unittests
+                  name: codecov-umbrella
+
+    build_android:
+        needs: code_quality
+        runs-on: ubuntu-latest
+        name: Build Android APK
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Flutter
+              uses: subosito/flutter-action@v2
+              with:
+                  flutter-version: "3.24.3"
+                  channel: "stable"
+                  cache: true
+
+            - name: Setup Java
+              uses: actions/setup-java@v3
+              with:
+                  distribution: "zulu"
+                  java-version: "17"
+
+            - name: Install dependencies
+              run: flutter pub get
+
+            - name: Build APK
+              run: flutter build apk --release
+
+            - name: Upload APK artifact
+              uses: actions/upload-artifact@v3
+              with:
+                  name: app-release.apk
+                  path: build/app/outputs/flutter-apk/app-release.apk
+
+    build_ios:
+        needs: code_quality
+        runs-on: macos-latest
+        name: Build iOS
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Flutter
+              uses: subosito/flutter-action@v2
+              with:
+                  flutter-version: "3.24.3"
+                  channel: "stable"
+                  cache: true
+
+            - name: Install dependencies
+              run: flutter pub get
+
+            - name: Build iOS (no codesign)
+              run: flutter build ios --release --no-codesign

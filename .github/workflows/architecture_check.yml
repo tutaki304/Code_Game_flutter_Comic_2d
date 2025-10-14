@@ -1,0 +1,129 @@
+name: Architecture Check
+
+on:
+    pull_request:
+        branches: [main, develop]
+        paths:
+            - "lib/**"
+            - "test/**"
+
+jobs:
+    architecture_check:
+        runs-on: ubuntu-latest
+        name: Verify Clean Architecture Compliance
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Flutter
+              uses: subosito/flutter-action@v2
+              with:
+                  flutter-version: "3.24.3"
+                  channel: "stable"
+                  cache: true
+
+            - name: Install dependencies
+              run: flutter pub get
+
+            - name: Check domain layer purity
+              run: |
+                  echo "🔍 Checking domain layer for clean architecture violations..."
+
+                  # Check if domain layer imports Flutter
+                  if grep -r "import 'package:flutter" lib/domain/ 2>/dev/null; then
+                    echo "❌ Domain layer should not import Flutter packages"
+                    exit 1
+                  fi
+
+                  # Check if domain layer imports data layer
+                  if grep -r "import.*lib/data/" lib/domain/ 2>/dev/null; then
+                    echo "❌ Domain layer should not import data layer"
+                    exit 1
+                  fi
+
+                  # Check if domain layer imports presentation layer
+                  if grep -r "import.*lib/presentation/" lib/domain/ 2>/dev/null; then
+                    echo "❌ Domain layer should not import presentation layer"
+                    exit 1
+                  fi
+
+                  echo "✅ Domain layer is clean"
+
+            - name: Check data layer compliance
+              run: |
+                  echo "🔍 Checking data layer compliance..."
+
+                  # Check if repositories implement domain interfaces
+                  if [ -d "lib/data/repositories_impl" ]; then
+                    echo "✅ Repository implementations found"
+                  else
+                    echo "⚠️ No repository implementations found"
+                  fi
+
+                  # Check if models are in correct location
+                  if [ -d "lib/data/models" ]; then
+                    echo "✅ Data models found"
+                  else
+                    echo "⚠️ No data models found"
+                  fi
+
+            - name: Check file naming conventions
+              run: |
+                  echo "🔍 Checking file naming conventions..."
+
+                  # Check for snake_case file names
+                  find lib/ -name "*.dart" | while read file; do
+                    filename=$(basename "$file" .dart)
+                    if [[ ! "$filename" =~ ^[a-z][a-z0-9_]*$ ]]; then
+                      echo "❌ File should use snake_case: $file"
+                      exit 1
+                    fi
+                  done
+
+                  echo "✅ All files follow snake_case naming convention"
+
+            - name: Check for forbidden patterns
+              run: |
+                  echo "🔍 Checking for forbidden patterns..."
+
+                  # Check for print statements (should use logger)
+                  if grep -r "print(" lib/ --include="*.dart" | grep -v "_test.dart"; then
+                    echo "❌ Found print() statements. Use logger instead."
+                    exit 1
+                  fi
+
+                  # Check for TODO comments
+                  if grep -r "TODO" lib/ --include="*.dart"; then
+                    echo "⚠️ Found TODO comments. Consider creating issues for them."
+                  fi
+
+                  # Check for hardcoded strings that should be localized
+                  if grep -r "'[A-Z].*'" lib/presentation/ --include="*.dart" | grep -v "key:" | head -5; then
+                    echo "⚠️ Found potential hardcoded strings in presentation layer"
+                  fi
+
+                  echo "✅ Pattern check completed"
+
+            - name: Check test coverage
+              run: |
+                  echo "🔍 Checking test organization..."
+
+                  # Check if test directory structure exists
+                  if [ -d "test/unit" ] && [ -d "test/widget" ]; then
+                    echo "✅ Test directory structure is correct"
+                  else
+                    echo "⚠️ Consider organizing tests into unit/ and widget/ directories"
+                  fi
+
+                  # Check for test files
+                  test_count=$(find test/ -name "*_test.dart" | wc -l)
+                  lib_count=$(find lib/ -name "*.dart" | wc -l)
+
+                  echo "📊 Found $test_count test files for $lib_count source files"
+
+                  if [ "$test_count" -gt 0 ]; then
+                    echo "✅ Tests found"
+                  else
+                    echo "⚠️ No test files found"
+                  fi

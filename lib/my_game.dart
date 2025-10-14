@@ -98,7 +98,7 @@ class MyGame extends FlameGame
 
     // Size và margin tùy theo thiết bị
     final joystickSizePercent =
-        isPhone ? 0.20 : 0.12; // Phone lớn hơn để dễ chạm
+        isPhone ? 0.24 : 0.12; // Tăng nhẹ kích thước joystick trên phone
     final marginPercent = isPhone ? 0.08 : 0.04; // Phone cần margin lớn hơn
 
     final joystickSize = Vector2.all(size.x * joystickSizePercent);

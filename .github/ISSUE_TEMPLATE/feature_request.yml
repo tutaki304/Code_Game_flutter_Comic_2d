@@ -1,0 +1,162 @@
+name: ✨ Feature Request
+description: Đề xuất tính năng mới cho ứng dụng
+title: "[FEATURE] "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Cảm ơn bạn đã đề xuất tính năng mới! Vui lòng cung cấp thông tin chi tiết để chúng tôi có thể evaluate và implement.
+
+    - type: input
+      id: feature-title
+      attributes:
+          label: 🎯 Tên tính năng
+          description: Tên ngắn gọn cho tính năng đề xuất
+          placeholder: Ví dụ - Multi-player mode cho Memory Match Game
+      validations:
+          required: true
+
+    - type: textarea
+      id: problem
+      attributes:
+          label: 🤔 Vấn đề/Nhu cầu
+          description: Tính năng này giải quyết vấn đề gì? Tại sao bạn cần tính năng này?
+          placeholder: |
+              Hiện tại người chơi chỉ có thể chơi một mình, điều này làm giảm tính hấp dẫn...
+              Tôi muốn có thể thách đấu với bạn bè...
+      validations:
+          required: true
+
+    - type: textarea
+      id: solution
+      attributes:
+          label: 💡 Giải pháp đề xuất
+          description: Mô tả chi tiết tính năng bạn muốn có
+          placeholder: |
+              1. Thêm chế độ multiplayer online
+              2. Người chơi có thể invite bạn bè qua code room
+              3. Hiển thị điểm số real-time của cả 2 người
+              4. Người nào hoàn thành trước sẽ thắng
+      validations:
+          required: true
+
+    - type: dropdown
+      id: priority
+      attributes:
+          label: 📊 Mức độ ưu tiên
+          description: Bạn đánh giá mức độ quan trọng của tính năng này?
+          options:
+              - Low - Nice to have
+              - Medium - Would be helpful
+              - High - Really needed
+              - Critical - Essential for app success
+      validations:
+          required: true
+
+    - type: dropdown
+      id: complexity
+      attributes:
+          label: 🔧 Độ phức tạp dự kiến
+          description: Bạn nghĩ tính năng này phức tạp như thế nào?
+          options:
+              - Simple - Có thể implement trong vài giờ
+              - Medium - Cần vài ngày để implement
+              - Complex - Cần vài tuần và design kỹ lưỡng
+              - Very Complex - Major feature, cần planning chu đáo
+      validations:
+          required: true
+
+    - type: textarea
+      id: user-story
+      attributes:
+          label: 👤 User Story
+          description: Viết user story theo format "As a... I want... So that..."
+          placeholder: |
+              As a player, I want to challenge my friends in real-time matches
+              So that the game becomes more engaging and competitive
+      validations:
+          required: true
+
+    - type: textarea
+      id: acceptance-criteria
+      attributes:
+          label: ✅ Acceptance Criteria
+          description: Điều kiện cần thiết để tính năng được coi là hoàn thành
+          placeholder: |
+              - [ ] User có thể tạo room và share room code
+              - [ ] User có thể join room bằng room code
+              - [ ] Game hiển thị progress của cả 2 players real-time
+              - [ ] Hiển thị winner khi game kết thúc
+              - [ ] Handle edge cases (disconnect, timeout, etc.)
+
+    - type: textarea
+      id: ui-mockup
+      attributes:
+          label: 🎨 UI/UX Mockup
+          description: Mô tả hoặc attach mockup về giao diện (nếu có)
+          placeholder: |
+              - Màn hình tạo room với button "Create Room" và "Join Room"
+              - Room screen hiển thị 2 game boards side by side
+              - Progress bar cho mỗi player
+              - Chat box nhỏ để giao tiếp
+
+    - type: textarea
+      id: technical-considerations
+      attributes:
+          label: ⚙️ Technical Considerations
+          description: Các yếu tố kỹ thuật cần xem xét (nếu bạn biết)
+          placeholder: |
+              - Cần backend service cho real-time communication
+              - WebSocket hoặc Firebase Realtime Database
+              - Authentication system
+              - Game state synchronization
+              - Network handling và error recovery
+
+    - type: checkboxes
+      id: affected-areas
+      attributes:
+          label: 📱 Khu vực ảnh hưởng
+          description: Tính năng này sẽ ảnh hưởng đến phần nào của app?
+          options:
+              - label: Core game logic
+              - label: UI/UX design
+              - label: Data persistence
+              - label: Network/API
+              - label: Authentication
+              - label: Performance
+              - label: Testing strategy
+
+    - type: textarea
+      id: alternatives
+      attributes:
+          label: 🔄 Alternatives considered
+          description: Các cách tiếp cận khác mà bạn đã xem xét (nếu có)
+          placeholder: |
+              - Thay vì real-time multiplayer, có thể làm turn-based
+              - Thay vì online multiplayer, có thể làm local multiplayer trước
+
+    - type: textarea
+      id: additional-context
+      attributes:
+          label: 📎 Additional context
+          description: Thông tin bổ sung, references, examples từ apps khác
+          placeholder: |
+              - Link đến apps tương tự có tính năng này
+              - User feedback hoặc requests từ community
+              - Business reasons cho tính năng này
+
+    - type: checkboxes
+      id: checklist
+      attributes:
+          label: ✅ Checklist
+          description: Vui lòng check các items sau
+          options:
+              - label: Tôi đã search existing issues và không tìm thấy feature request tương tự
+                required: true
+              - label: Tính năng này phù hợp với scope của Memory Match Game
+                required: true
+              - label: Tôi đã cung cấp đầy đủ thông tin để evaluate feature
+                required: true

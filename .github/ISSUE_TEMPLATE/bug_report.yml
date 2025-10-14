@@ -1,0 +1,132 @@
+name: 🐛 Bug Report
+description: Báo cáo lỗi trong ứng dụng
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Cảm ơn bạn đã báo cáo bug! Vui lòng điền đầy đủ thông tin để chúng tôi có thể reproduce và fix lỗi nhanh chóng.
+
+    - type: input
+      id: summary
+      attributes:
+          label: 📝 Tóm tắt lỗi
+          description: Mô tả ngắn gọn về lỗi
+          placeholder: Ví dụ - App crash khi tap vào Pokemon card
+      validations:
+          required: true
+
+    - type: textarea
+      id: description
+      attributes:
+          label: 📋 Mô tả chi tiết
+          description: Mô tả chi tiết về lỗi, điều gì đã xảy ra
+          placeholder: |
+              1. Tôi đã làm gì...
+              2. Điều gì đã xảy ra...
+              3. Tôi mong đợi điều gì...
+      validations:
+          required: true
+
+    - type: textarea
+      id: reproduction
+      attributes:
+          label: 🔄 Các bước để reproduce
+          description: Các bước chi tiết để reproduce lỗi
+          placeholder: |
+              1. Mở app
+              2. Chọn level Easy
+              3. Tap vào Pokemon card đầu tiên
+              4. App crash
+      validations:
+          required: true
+
+    - type: textarea
+      id: expected
+      attributes:
+          label: ✅ Kết quả mong đợi
+          description: Bạn mong đợi điều gì sẽ xảy ra?
+          placeholder: Card should flip và show Pokemon image
+      validations:
+          required: true
+
+    - type: textarea
+      id: actual
+      attributes:
+          label: ❌ Kết quả thực tế
+          description: Điều gì thực sự đã xảy ra?
+          placeholder: App crashed với error message
+      validations:
+          required: true
+
+    - type: dropdown
+      id: device-type
+      attributes:
+          label: 📱 Loại thiết bị
+          description: Bạn đang sử dụng thiết bị gì?
+          options:
+              - Android Phone
+              - Android Tablet
+              - iPhone
+              - iPad
+              - Web Browser
+              - Desktop (Windows)
+              - Desktop (macOS)
+              - Desktop (Linux)
+      validations:
+          required: true
+
+    - type: input
+      id: device-info
+      attributes:
+          label: 🔧 Thông tin thiết bị
+          description: Model thiết bị và phiên bản OS
+          placeholder: Ví dụ - Samsung Galaxy S21, Android 12 hoặc iPhone 13, iOS 15.5
+      validations:
+          required: true
+
+    - type: input
+      id: app-version
+      attributes:
+          label: 📦 Phiên bản app
+          description: Phiên bản app bạn đang sử dụng
+          placeholder: Ví dụ - v1.0.0 hoặc commit hash
+      validations:
+          required: true
+
+    - type: textarea
+      id: logs
+      attributes:
+          label: 📜 Logs/Error messages
+          description: Paste logs hoặc error messages (nếu có)
+          placeholder: |
+              Paste error logs here...
+              Flutter logs: `flutter logs`
+              Android logs: `adb logcat`
+          render: shell
+
+    - type: textarea
+      id: additional-context
+      attributes:
+          label: 📎 Thông tin bổ sung
+          description: Screenshots, videos, hoặc thông tin khác
+          placeholder: |
+              - Screenshots nếu có
+              - Frequency: Lỗi xảy ra như thế nào? (Always, Sometimes, Rarely)
+              - Workaround: Có cách nào để tránh lỗi không?
+
+    - type: checkboxes
+      id: checklist
+      attributes:
+          label: ✅ Checklist
+          description: Vui lòng check các items sau
+          options:
+              - label: Tôi đã search existing issues và không tìm thấy issue tương tự
+                required: true
+              - label: Tôi đang sử dụng phiên bản app mới nhất
+                required: true
+              - label: Tôi đã cung cấp đầy đủ thông tin để reproduce lỗi
+                required: true
