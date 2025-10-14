@@ -81,7 +81,14 @@ class AudioManager extends Component {
     await _soloud.init(); // Initialize low-level audio
 
     // ===== FLAME AUDIO INITIALIZATION (BACKGROUND MUSIC) =====
-    FlameAudio.bgm.initialize(); // Prepare background music system
+    try {
+      FlameAudio.bgm.initialize(); // Prepare background music system
+    } catch (e) {
+      print('⚠️ FlameAudio initialization failed: $e');
+      print(
+          '💡 Background music sẽ không khả dụng, nhưng sound effects vẫn hoạt động');
+      // Continue without music - game still playable
+    }
 
     // ===== PRELOAD ALL SOUND EFFECTS =====
     print('🎵 Loading sounds with flutter_soloud...');
@@ -112,11 +119,18 @@ class AudioManager extends Component {
    * - Streaming playback (no memory impact)
    * - Cross-platform compatibility
    * 
-   * Note: Music disabled on Windows để avoid crash issues
+   * Note: Windows có issue với OGG format trong audioplayers
+   * Error handling để tránh crash khi format không được hỗ trợ
    */
   void playMusic() {
     if (musicEnabled) {
-      FlameAudio.bgm.play('music.ogg'); // Start looping background music
+      try {
+        FlameAudio.bgm.play('music.ogg'); // Start looping background music
+      } catch (e) {
+        print('❌ Failed to play music: $e');
+        print('💡 Music playback không được hỗ trợ trên platform này');
+        // Silently fail - game continues without music
+      }
     }
   }
 
@@ -154,13 +168,19 @@ class AudioManager extends Component {
    * - OFF: Stop current music playback
    * 
    * Used by: UI controls trong settings hoặc title screen
+   * Note: Error handling để tránh crash khi format không được hỗ trợ
    */
   void toggleMusic() {
     musicEnabled = !musicEnabled; // Toggle state
     if (musicEnabled) {
-      playMusic(); // Start music immediately
+      playMusic(); // Start music immediately (with error handling)
     } else {
-      FlameAudio.bgm.stop(); // Stop current music
+      try {
+        FlameAudio.bgm.stop(); // Stop current music
+      } catch (e) {
+        print('❌ Failed to stop music: $e');
+        // Silently fail - no impact on gameplay
+      }
     }
   }
 
