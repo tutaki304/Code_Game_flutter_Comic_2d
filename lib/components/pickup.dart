@@ -1,170 +1,229 @@
-import 'dart:async'; // Async/await support
-
-import 'package:cosmic_havoc/my_game.dart'; // Game instance access
-import 'package:flame/collisions.dart'; // Collision system
+import 'dart:async'; // Hỗ trợ Async/await
+import 'package:cosmic_havoc/my_game.dart'; // Truy cập game instance
+import 'package:flame/collisions.dart'; // Hệ thống va chạm
 import 'package:flame/components.dart'; // Flame components
-import 'package:flame/effects.dart'; // Animation effects
-import 'package:flutter/widgets.dart'; // Curves for animations
+import 'package:flame/effects.dart'; // Hiệu ứng animation
+import 'package:flutter/widgets.dart'; // Curves cho animations
 
 /**
- * PickupType - Enum defines available power-up types
+ * ===============================================
+ * 🎁 PICKUP TYPE - Các loại vật phẩm
+ * ===============================================
  * 
- * 🎁 PICKUP TYPES:
- * - bomb: Area-of-effect weapon (screen clear)
- * - laser: Upgrade laser level (+1, max 10)
- * - shield: Temporary invincibility protection
+ * LOẠI VẬT PHẨM:
+ * - bomb: Bom xóa sạch màn hình
+ * - laser: Nâng cấp laser (+1 level, tối đa 10)
+ * - shield: Khiên bảo vệ tạm thời
+ * - coin: Đồng xu rơi từ asteroid3 (tăng điểm)
+ * 
+ * 📝 LUU Ý QUAN TRỌNG:
+ * - Coin CHỈ rơi từ asteroid3.png khi bị phá hủy
+ * - Các power-up khác (bomb/laser/shield) spawn ngẫu nhiên
+ * - Mỗi loại có sprite riêng: {type}_pickup.png
  */
-enum PickupType { bomb, laser, shield }
+enum PickupType { bomb, laser, shield, coin }
 
 /**
- * Pickup - Collectible power-ups that enhance player abilities
+ * ===============================================
+ * 🎁 CLASS PICKUP - Vật phẩm thu thập
+ * ===============================================
  * 
- * 🎁 CHỨC NĂNG CHÍNH:
- * - Falling power-ups spawned randomly by PickupSpawner
- * - Player collision triggers power-up effect
- * - Visual: Pulsating animation để attract attention
- * - Movement: Falls downward at constant speed (300 px/s)
+ * � CHỨC NĂNG CHÍNH:
+ * - Vật phẩm rơi xuống từ trên cao với tốc độ 300 px/s
+ * - Player va chạm để thu thập và nhận hiệu ứng
+ * - Hiệu ứng visual: Animation phình to/nhỏ liên tục
+ * - Tự động xóa khi ra khỏi màn hình (bottom edge)
  * 
- * 🎮 PICKUP EFFECTS:
- * - BOMB: Deploys screen-clearing explosion
- * - LASER: Increases laser level (1→10, more projectiles)
- * - SHIELD: Activates temporary invincibility
+ * 🎮 HIỆU ỨNG CÁC LOẠI PICKUP:
+ * - BOMB: Tạo bom xóa sạch các asteroid trên màn hình
+ * - LASER: Tăng level laser lên 1 bậc (tối đa level 10)
+ * - SHIELD: Kích hoạt khiên bảo vệ tạm thời
+ * - COIN: Tăng 10 điểm khi thu thập (chỉ rơi từ asteroid3)
  * 
- * 🎨 VISUAL DESIGN:
- * - Distinct sprites: bomb_pickup.png, laser_pickup.png, shield_pickup.png
- * - Pulsating effect: Scale 1.0 ↔ 0.9 (infinite loop)
- * - Size: 100x100 pixels (easy to collect)
+ * 📏 KÍCH THƯỚC:
+ * - Power-ups (bomb/laser/shield): 100x100 pixels
+ * - Coin: 40x40 pixels (nhỏ hơn để phân biệt)
  * 
- * 🔄 LIFECYCLE:
- * - Spawned at random intervals by game
- * - Falls downward until collected or off-screen
- * - Auto-cleanup khi reaches bottom edge
+ * 🎨 THIẾT KẾ VISUAL:
+ * - Mỗi loại có sprite riêng: bomb_pickup.png, laser_pickup.png, etc.
+ * - Hiệu ứng phình to nhỏ: Scale 1.0 ↔ 0.9 (lặp vô hạn)
+ * - Animation thu hút sự chú ý của người chơi
  * 
- * 💫 COLLECTION MECHANICS:
- * - Collision với Player triggers effect
- * - Immediate removal from game
- * - Score bonus (+10 points)
- * - Audio feedback ('collect' sound)
+ * 🔄 CHU TRÌNH SỐNG:
+ * 1. Spawn tại vị trí ngẫu nhiên hoặc từ asteroid bị phá hủy
+ * 2. Rơi xuống với tốc độ 300 px/s
+ * 3. Player thu thập hoặc rơi ra khỏi màn hình
+ * 4. Tự động cleanup để tiết kiệm bộ nhớ
+ * 
+ * 💫 CƠ CHẾ THU THẬP:
+ * - Va chạm với Player kích hoạt hiệu ứng
+ * - Xóa ngay khỏi game sau khi thu thập
+ * - Phát âm thanh 'collect' để phản hồi
+ * - Tăng điểm (chỉ với coin: +10 điểm)
+ * 
+ * 📝 GHI CHÚ QUAN TRỌNG:
+ * - Coin CHỈ spawn từ asteroid3.png khi bị phá hủy
+ * - Power-ups khác spawn ngẫu nhiên từ PickupSpawner
+ * - Không tăng điểm khi thu power-ups (chỉ coin mới tăng điểm)
  */
 class Pickup extends SpriteComponent with HasGameReference<MyGame> {
   // ===============================================
-  // 🎁 PICKUP PROPERTIES
+  // 🎁 THUỘC TÍNH PICKUP
   // ===============================================
 
-  final PickupType pickupType; // Type of power-up (bomb/laser/shield)
+  final PickupType pickupType; // Loại power-up (bomb/laser/shield/coin)
 
   // ===============================================
-  // 🏗️ CONSTRUCTOR
+  // 🏗️ CONSTRUCTOR - Hàm khởi tạo
   // ===============================================
 
   /**
-   * Pickup Constructor - Tạo pickup tại specified position
+   * Pickup Constructor - Tạo vật phẩm tại vị trí chỉ định
    * 
-   * @param position - Spawn position (usually from PickupSpawner)
-   * @param pickupType - Type of pickup effect (bomb/laser/shield)
+   * @param position - Vị trí spawn (từ PickupSpawner hoặc asteroid)
+   * @param pickupType - Loại vật phẩm (bomb/laser/shield/coin)
    * 
-   * Default properties:
-   * - Size: 100x100 pixels (consistent collectible size)
-   * - Anchor: Center (for proper collision detection)
+   * KÍCH THƯỚC MẶC ĐỊNH:
+   * - Power-ups (bomb/laser/shield): 100x100 pixels
+   * - Coin: 40x40 pixels (nhỏ hơn để dễ phân biệt)
+   * 
+   * 📝 LƯU Ý:
+   * - Anchor ở center để va chạm chính xác
+   * - Size coin nhỏ hơn vì chỉ để lấy điểm, không phải power-up quan trọng
+   * - Có thể điều chỉnh số 40 (coin size) theo ý muốn
    */
   Pickup({required super.position, required this.pickupType})
-      : super(size: Vector2.all(100), anchor: Anchor.center);
+      : super(
+          size: pickupType == PickupType.coin
+              ? Vector2.all(40) // 🪙 COIN: 40x40 pixels (nhỏ gọn)
+              : Vector2.all(100), // 🎁 POWER-UPS: 100x100 pixels
+          anchor: Anchor.center, // Neo ở giữa
+        );
 
   // ===============================================
-  // 🔄 INITIALIZATION & ANIMATION
+  // 🔄 KHỞI TẠO & ANIMATION
   // ===============================================
 
   /**
-   * onLoad() - Initialize pickup sprite và pulsating animation
+   * onLoad() - Khởi tạo sprite và animation phình to/nhỏ
    * 
-   * Setup sequence:
-   * 1. Load appropriate sprite based on pickup type
-   * 2. Add circular collision hitbox
-   * 3. Start infinite pulsating animation
+   * CHU TRÌNH SETUP:
+   * 1. Load sprite phù hợp dựa trên loại pickup
+   * 2. Thêm circular collision hitbox
+   * 3. Bắt đầu animation phình to/nhỏ vô hạn
    * 
-   * Sprite naming convention: "${type}_pickup.png"
-   * - bomb_pickup.png, laser_pickup.png, shield_pickup.png
+   * QUY TẮC ĐẶT TÊN SPRITE: "{loại}_pickup.png"
+   * - bomb_pickup.png (bom)
+   * - laser_pickup.png (laser)
+   * - shield_pickup.png (khiên)
+   * - coin_pickup.png (đồng xu)
+   * 
+   * 📝 LƯU Ý:
+   * - Sprite tự động load dựa vào pickupType.name
+   * - Animation giúp thu hút sự chú ý người chơi
    */
   @override
   FutureOr<void> onLoad() async {
-    // ===== SPRITE LOADING =====
+    // ===== LOAD SPRITE =====
     sprite = await game
-        .loadSprite('${pickupType.name}_pickup.png'); // Dynamic sprite loading
+        .loadSprite('${pickupType.name}_pickup.png'); // Load sprite động
 
-    // ===== COLLISION SETUP =====
-    add(CircleHitbox()); // Circular collision area
+    // ===== THIẾT LẬP VA CHẠM =====
+    add(CircleHitbox()); // Vùng va chạm hình tròn
 
-    // ===== PULSATING ANIMATION =====
+    // ===== HIỆU ỨNG PHÌNH TO NHỎ =====
     final ScaleEffect pulsatingEffect = ScaleEffect.to(
-      Vector2.all(0.9), // Scale xuống 90%
+      Vector2.all(0.9), // Thu nhỏ xuống 90% kích thước
       EffectController(
-        duration: 0.6, // 0.6 second pulse cycle
-        alternate: true, // Scale xuống rồi lên lại
-        infinite: true, // Continue forever
-        curve: Curves.easeInOut, // Smooth pulsing motion
+        duration: 0.6, // Chu kỳ 0.6 giây
+        alternate: true, // Phình to rồi nhỏ lại (lặp lại)
+        infinite: true, // Lặp vô hạn
+        curve: Curves.easeInOut, // Chuyển động mượt mà
       ),
     );
-    add(pulsatingEffect); // Apply pulsating effect
+    add(pulsatingEffect); // Áp dụng hiệu ứng
 
     return super.onLoad();
   }
 
   // ===============================================
-  // 🔄 MOVEMENT & CLEANUP
+  // 🔄 DI CHUYỂN & DỌN DẸP
   // ===============================================
 
   /**
-   * update() - Handle pickup movement và screen bounds
+   * update() - Xử lý di chuyển pickup và giới hạn màn hình
    * 
-   * Movement behavior:
-   * 1. Constant downward movement (300 pixels/second)
-   * 2. Auto-cleanup when reaching bottom edge
+   * HÀNH VI DI CHUYỂN:
+   * 1. Rơi xuống liên tục với tốc độ 300 pixels/giây
+   * 2. Tự động xóa khi chạm đáy màn hình
    * 
-   * Speed design: Slower than asteroids to give player
-   * reasonable time to collect while dodging threats
+   * THIẾT KẾ TỐC ĐỘ:
+   * - Chậm hơn asteroid để người chơi có thời gian thu thập
+   * - Vẫn đủ nhanh để tạo áp lực phải di chuyển
+   * - 300 px/s là tốc độ cân bằng giữa dễ và khó
+   * 
+   * 📝 LƯU Ý:
+   * - Pickup không wrap ngang như asteroid
+   * - Chỉ di chuyển thẳng xuống dưới
+   * - Tự động cleanup khi ra khỏi màn hình để tiết kiệm bộ nhớ
    */
   @override
   void update(double dt) {
     super.update(dt);
 
-    // ===== DOWNWARD MOVEMENT =====
-    position.y += 300 * dt; // Fall at moderate speed (300 px/s)
+    // ===== DI CHUYỂN XUỐNG DƯỚI =====
+    position.y += 300 * dt; // Rơi với tốc độ vừa phải (300 px/s)
 
-    // ===== SCREEN CLEANUP =====
-    // Xóa pickup khi đi qua bottom edge (bỏ lỡ cơ hội)
+    // ===== DỌN DẸP KHI RA KHỎI MÀN HÌNH =====
+    // Xóa pickup khi đi qua đáy màn hình (người chơi bỏ lỡ)
     if (position.y > game.size.y + size.y / 2) {
-      removeFromParent(); // Clean up memory
+      removeFromParent(); // Dọn dẹp bộ nhớ
     }
   }
 }
 
 // ===============================================
-// 📝 IMPLEMENTATION NOTES  
+// 📝 GHI CHÚ TRIỂN KHAI (IMPLEMENTATION NOTES)
 // ===============================================
 //
-// 🎁 PICKUP BALANCE:
-// - Fall speed: 300 px/s (moderate - catchable but requires effort)
-// - Size: 100px (large enough to collect easily)
-// - Pulsing: Visual attention grabber
+// 🎁 CÂN BẰNG GAMEPLAY:
+// - Tốc độ rơi: 300 px/s (vừa phải - có thể bắt được nhưng cần cố gắng)
+// - Kích thước: 100px cho power-ups, 40px cho coin
+// - Animation phình to nhỏ: Thu hút sự chú ý người chơi
 //
-// 🎮 GAMEPLAY INTEGRATION:
-// - Collection handled by Player.onCollision()
-// - Each type triggers different Player method:
-//   * bomb → Player.collectBomb()
-//   * laser → Player.collectLaser() 
-//   * shield → Player.collectShield()
+// 🎮 TÍCH HỢP VỚI GAME:
+// - Thu thập được xử lý bởi Player.onCollision()
+// - Mỗi loại kích hoạt effect khác nhau:
+//   * bomb → Spawn Bomb component xóa màn hình
+//   * laser → Tăng laser level lên 1 (_upgradeLaserLevel)
+//   * shield → Kích hoạt Shield component bảo vệ
+//   * coin → Tăng 10 điểm (KHÔNG có effect đặc biệt khác)
 //
-// 🎨 VISUAL FEEDBACK:
-// - Pulsating animation draws player attention
-// - Color coding: Each pickup type has distinct sprite
-// - Size consistency: All pickups same size for fair gameplay
+// 🎨 PHẢN HỒI VISUAL:
+// - Animation phình to nhỏ thu hút chú ý
+// - Màu sắc riêng biệt: Mỗi loại có sprite khác nhau
+// - Kích thước nhất quán: Dễ nhận biết và thu thập
 //
-// 🔧 SPAWN MECHANICS:
-// - Created by PickupSpawner at random intervals
-// - Random type selection weighted by game balance
-// - Position: Random X across screen width
+// 🔧 CƠ CHẾ SPAWN:
+// - Power-ups (bomb/laser/shield): PickupSpawner tạo ngẫu nhiên
+// - Coin: CHỈ spawn từ asteroid3.png khi bị phá hủy (xem asteroid.dart)
+// - Vị trí: X ngẫu nhiên trên chiều rộng màn hình
 //
-// 💫 COLLECTION REWARDS:
-// - Score bonus: +10 points per pickup
-// - Power-up effect: Varies by type
-// - Audio feedback: 'collect' sound on pickup
+// � PHẦN THƯỞNG THU THẬP:
+// - Coin: +10 điểm (mục đích chính để kiếm điểm)
+// - Power-ups: KHÔNG tăng điểm, chỉ có hiệu ứng đặc biệt
+// - Âm thanh: Phát 'collect' sound khi thu thập bất kỳ pickup nào
+// - Xóa ngay: Pickup biến mất ngay sau khi thu thập
+//
+// 💰 HỆ THỐNG COIN ĐẶC BIỆT:
+// - Coin là nguồn điểm DUY NHẤT trong game
+// - CHỈ rơi từ asteroid3.png (không phải asteroid1 hay asteroid2)
+// - Giá trị: 10 điểm/coin
+// - Mục đích: Khuyến khích người chơi ưu tiên bắn asteroid3
+// - Balance: Tạo risk vs reward (di chuyển để lấy coin vs tránh asteroid)
+//
+// 🎯 CHIẾN THUẬT NGƯỜI CHƠI:
+// - Ưu tiên bắn asteroid3 để spawn coin
+// - Thu thập coin để tăng điểm (không thể tăng điểm cách khác)
+// - Cân nhắc lấy power-ups để mạnh hơn vs focus kiếm coin
+// - Di chuyển khôn ngoan để lấy coin mà không bị asteroid đâm

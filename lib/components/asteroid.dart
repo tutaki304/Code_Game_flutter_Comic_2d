@@ -2,6 +2,7 @@ import 'dart:async'; // Hỗ trợ Async/await
 import 'dart:math'; // Toán học (Random, etc.)
 
 import 'package:cosmic_havoc/components/explosion.dart'; // Hiệu ứng nổ khi asteroid bị phá hủy
+import 'package:cosmic_havoc/components/pickup.dart'; // Import pickup để spawn coin
 import 'package:cosmic_havoc/my_game.dart'; // Game chính để truy cập game state
 import 'package:flame/collisions.dart'; // Hệ thống va chạm
 import 'package:flame/components.dart'; // Flame components cơ bản
@@ -71,6 +72,8 @@ class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
   bool _isKnockedback =
       false; // Có đang bị đẩy lùi không? (prevents double-knockback)
 
+  late String _spriteName; // Lưu tên sprite để biết loại asteroid nào
+
   // ===============================================
   // 🏗️ CONSTRUCTOR
   // ===============================================
@@ -128,7 +131,8 @@ class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
   FutureOr<void> onLoad() async {
     // ===== RANDOM SPRITE SELECTION =====
     final int imageNum = _random.nextInt(3) + 1; // Ngẫu nhiên 1-3
-    sprite = await game.loadSprite('asteroid$imageNum.png');
+    _spriteName = 'asteroid$imageNum.png'; // Lưu tên sprite
+    sprite = await game.loadSprite(_spriteName);
 
     return super.onLoad();
   }
@@ -219,12 +223,13 @@ class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
    * 1. Phát âm thanh đánh trúng
    * 2. Giảm health xuống 1
    * 3a. Nếu health <= 0: PHÁ HỦY
-   *     - Thưởng +2 điểm bonus
+   *     - Spawn coin khi phá hủy asteroid NHỎ NHẤT (không còn tách)
+   *     - TẤT CẢ loại asteroid (1,2,3) đều rơi coin ở mảnh cuối
    *     - Loại bỏ khỏi game
    *     - Tạo hiệu ứng nổ
-   *     - Tách thành các mảnh nhỏ hơn
+   *     - Tách thành các mảnh nhỏ hơn (nếu đủ lớn)
    * 3b. Nếu vẫn sống: PHẢN HỒI DAMAGE
-   *     - Thưởng +1 điểm đánh trúng
+   *     - Không tăng điểm khi hit (chỉ khi thu coin)
    *     - Hiệu ứng flash trắng
    *     - Hiệu ứng đẩy lùi
    * 
@@ -240,16 +245,48 @@ class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
     // ===== DESTRUCTION vs DAMAGE =====
     if (_health <= 0) {
       // ===== DESTRUCTION SEQUENCE =====
-      game.incrementScore(2); // Điểm thưởng cho việc phá hủy
+
+      // Spawn coin KHI PHÁ HỦY asteroid NHỎ NHẤT (viên cuối cùng, không còn tách)
+      // TẤT CẢ loại asteroid (1,2,3) đều rơi coin ở mảnh cuối
+      // Điều kiện: size <= 40 (maxSize/3) - không còn tách nữa
+      if (size.x <= _maxSize / 3) {
+        _spawnCoin();
+      }
+
       removeFromParent(); // Xóa asteroid khỏi game
       _createExplosion(); // Hiệu ứng nổ
       _splitAsteroid(); // Tách thành các mảnh nhỏ hơn (nếu đủ lớn)
     } else {
       // ===== DAMAGE FEEDBACK SEQUENCE =====
-      game.incrementScore(1); // Điểm trúng (mỗi lần laser hit)
+      // Không tăng điểm ở đây nữa - điểm chỉ tăng khi thu coin
       _flashWhite(); // Phản hồi visual damage
       _applyKnockback(); // Đẩy asteroid về phía sau
     }
+  }
+
+  // ===============================================
+  // 💰 COIN SPAWNING
+  // ===============================================
+
+  /**
+   * _spawnCoin() - Spawn coin tại vị trí asteroid bị phá hủy
+   * 
+   * ⚠️ ĐIỀU KIỆN QUAN TRỌNG:
+   * - CHỈ gọi khi asteroid3.png
+   * - CHỈ gọi khi là viên cuối cùng (nhỏ nhất, không còn tách)
+   * - Điều kiện: size.x <= _maxSize / 3
+   * 
+   * 🎯 MỤC ĐÍCH:
+   * - Người chơi phải phá hủy HOÀN TOÀN asteroid3 (cả mảnh nhỏ)
+   * - Tránh spam coin khi asteroid lớn tách ra
+   * - Tạo cảm giác thành tựu khi phá hủy hết mảnh cuối
+   */
+  void _spawnCoin() {
+    final Pickup coin = Pickup(
+      position: position.clone(),
+      pickupType: PickupType.coin,
+    );
+    game.add(coin);
   }
 
   // ===============================================

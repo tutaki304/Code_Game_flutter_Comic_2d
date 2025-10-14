@@ -38,11 +38,12 @@ class AudioManager extends Component {
   // ===============================================
   // 🎵 AUDIO ASSETS CONFIGURATION
   // ===============================================
-
+  // khi phát triển âm thanh nhớ thêm sounds vào đây nhé chứ k lại fix sml k hiểu lỗi nằm ở đâu'
   final List<String> _sounds = [
     // Tất cả file âm thanh cần preload
     'click', // Click button UI
     'collect', // Pickup collection sound
+    'dropcoin', // Coin collection sound (riêng cho xu)
     'explode1', // Asteroid explosion (type 1)
     'explode2', // Asteroid explosion (type 2)
     'fire', // Weapon firing sound

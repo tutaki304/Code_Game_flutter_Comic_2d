@@ -273,10 +273,19 @@ class Player
     if (other is Asteroid) {
       if (activeShield == null) _handleDestruction();
     } else if (other is Pickup) {
-      game.audioManager.playSound('collect');
+      // Phát âm thanh khác nhau cho coin và power-ups
+      if (other.pickupType == PickupType.coin) {
+        game.audioManager.playSound('dropcoin'); // Âm thanh riêng cho coin
+      } else {
+        game.audioManager.playSound('collect'); // Âm thanh cho power-ups
+      }
 
       other.removeFromParent();
-      game.incrementScore(1);
+
+      // Chỉ tăng điểm khi thu coin, không tăng cho các pickup khác
+      if (other.pickupType == PickupType.coin) {
+        game.incrementScore(10); // Coin cho 10 điểm
+      }
 
       switch (other.pickupType) {
         case PickupType.laser:
@@ -292,6 +301,9 @@ class Player
           }
           activeShield = Shield();
           add(activeShield!);
+          break;
+        case PickupType.coin:
+          // 💰 Thu thập coin - đã tăng điểm và phát âm thanh ở trên
           break;
       }
     }
