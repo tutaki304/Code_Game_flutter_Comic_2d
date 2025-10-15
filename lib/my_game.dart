@@ -143,8 +143,9 @@ class MyGame extends FlameGame
   void _createAsteroidSpawner() {
     _asteroidSpawner = SpawnComponent.periodRange(
       factory: (index) => Asteroid(position: _generateSpawnPosition()),
-      minPeriod: 0.7,
-      maxPeriod: 1.2,
+      minPeriod:
+          1.2, // 🎮 Mobile: Tăng từ 0.7 -> 1.2 để giảm số asteroid ban đầu
+      maxPeriod: 1.8, // 🎮 Mobile: Tăng từ 1.2 -> 1.8 để dễ chơi hơn
       selfPositioning: true,
     );
     add(_asteroidSpawner);
@@ -157,8 +158,9 @@ class MyGame extends FlameGame
         pickupType:
             PickupType.values[_random.nextInt(PickupType.values.length)],
       ),
-      minPeriod: 5.0,
-      maxPeriod: 10.0,
+      minPeriod:
+          3.0, // 🎮 Mobile: Giảm từ 5.0 -> 3.0 để pickup xuất hiện nhanh hơn
+      maxPeriod: 6.0, // 🎮 Mobile: Giảm từ 10.0 -> 6.0 để dễ lấy power-up
       selfPositioning: true,
     );
     add(_pickupSpawner);

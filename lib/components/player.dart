@@ -91,8 +91,9 @@ class Player
     // Laser level giờ là permanent, không cần timer
 
     // Kết hợp input từ joystick và bàn phím
+    //tốc độ
     final Vector2 movement = game.joystick.relativeDelta + _keyboardMovement;
-    position += movement.normalized() * 200 * dt;
+    position += movement.normalized() * 250 * dt;
 
     _handleScreenBounds();
 
