@@ -120,19 +120,21 @@ class Player
     final double screenWidth = game.size.x;
     final double screenHeight = game.size.y;
 
-    // Ngăn player đi ra ngoài viền trên và dưới màn hình
+    // 🔒 KHÓA TÀU TRONG KHUNG HÌNH - KHÔNG CHO ĐI RA NGOÀI
+
+    // Giới hạn vị trí Y (trên - dưới)
     position.y = clampDouble(
       position.y,
-      size.y / 2,
-      screenHeight - size.y / 2,
+      size.y / 2, // Không cho đi qua mép trên
+      screenHeight - size.y / 2, // Không cho đi qua mép dưới
     );
 
-    // Thực hiện wraparound khi player đi qua viền trái hoặc phải
-    if (position.x < 0) {
-      position.x = screenWidth;
-    } else if (position.x > screenWidth) {
-      position.x = 0;
-    }
+    // Giới hạn vị trí X (trái - phải) - KHÓA THAY VÌ WRAPAROUND
+    position.x = clampDouble(
+      position.x,
+      size.x / 2, // Không cho đi qua mép trái
+      screenWidth - size.x / 2, // Không cho đi qua mép phải
+    );
   }
 
   void startShooting() {
