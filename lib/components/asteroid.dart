@@ -167,7 +167,7 @@ class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
    * _generateVelocity() - Calculate random velocity scaled by size
    * 
    * Tính toán velocity:
-   * 1. Velocity cơ bản: X ngẫu nhiên (-60 đến +60), Y xuống dưới (100-150)
+   * 1. Velocity cơ bản: X ngẫu nhiên (-45 đến +45), Y xuống dưới (75-112)
    * 2. Hệ số lực: Asteroid nhỏ hơn di chuyển nhanh hơn
    * 3. Velocity cuối = cơ bản * hệ số lực
    * 
@@ -175,14 +175,17 @@ class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
    * - Asteroid lớn (120px): hệ số = 1.0 (tốc độ bình thường)
    * - Asteroid trung (80px): hệ số = 1.5 (nhanh hơn)
    * - Asteroid nhỏ (40px): hệ số = 3.0 (nhanh nhiều)
+   * 
+   * 🎮 Màn hình nhỏ: Giảm 25% tốc độ để dễ né tránh hơn
    */
   Vector2 _generateVelocity() {
     final double forceFactor = _maxSize / size.x; // Càng nhỏ = factor càng cao
 
     // ===== BASE VELOCITY CALCULATION =====
+    // 🎮 Giảm 25%: X từ (-60,+60) -> (-45,+45), Y từ (100-150) -> (75-112)
     return Vector2(
-          _random.nextDouble() * 120 - 60, // X: Random ngang (-60 đến +60)
-          100 + _random.nextDouble() * 50, // Y: Xuống dưới (100 đến 150)
+          _random.nextDouble() * 90 - 45, // X: Random ngang (-45 đến +45)
+          75 + _random.nextDouble() * 37, // Y: Xuống dưới (75 đến 112)
         ) *
         forceFactor; // Scale theo size (nhỏ hơn = nhanh hơn)
   }

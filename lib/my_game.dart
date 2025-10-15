@@ -98,7 +98,7 @@ class MyGame extends FlameGame
 
     // Size và margin tùy theo thiết bị
     final joystickSizePercent =
-        isPhone ? 0.24 : 0.12; // Tăng nhẹ kích thước joystick trên phone
+        isPhone ? 0.28 : 0.12; // 🎮 Tăng từ 0.24 -> 0.28 cho màn hình nhỏ
     final marginPercent = isPhone ? 0.08 : 0.04; // Phone cần margin lớn hơn
 
     final joystickSize = Vector2.all(size.x * joystickSizePercent);
@@ -132,9 +132,9 @@ class MyGame extends FlameGame
       ..position = Vector2(size.x - margin, size.y - margin)
       ..priority = 10;
 
-    // Phone cần button lớn hơn để dễ chạm
+    // 🎮 Phone cần button lớn hơn 30% để dễ chạm (tăng từ 1.2 -> 1.3)
     if (isPhone) {
-      _shootButton.scale = Vector2.all(1.2);
+      _shootButton.scale = Vector2.all(1.3);
     }
 
     add(_shootButton);
@@ -144,8 +144,8 @@ class MyGame extends FlameGame
     _asteroidSpawner = SpawnComponent.periodRange(
       factory: (index) => Asteroid(position: _generateSpawnPosition()),
       minPeriod:
-          1.2, // 🎮 Mobile: Tăng từ 0.7 -> 1.2 để giảm số asteroid ban đầu
-      maxPeriod: 1.8, // 🎮 Mobile: Tăng từ 1.2 -> 1.8 để dễ chơi hơn
+          1.5, // 🎮 Màn hình nhỏ: Tăng từ 1.2 -> 1.5 để giảm density thiên thạch
+      maxPeriod: 2.2, // 🎮 Màn hình nhỏ: Tăng từ 1.8 -> 2.2 để dễ chơi hơn
       selfPositioning: true,
     );
     add(_asteroidSpawner);
@@ -159,8 +159,8 @@ class MyGame extends FlameGame
             PickupType.values[_random.nextInt(PickupType.values.length)],
       ),
       minPeriod:
-          3.0, // 🎮 Mobile: Giảm từ 5.0 -> 3.0 để pickup xuất hiện nhanh hơn
-      maxPeriod: 6.0, // 🎮 Mobile: Giảm từ 10.0 -> 6.0 để dễ lấy power-up
+          2.5, // 🎮 Màn hình nhỏ: Giảm từ 3.0 -> 2.5 để pickup xuất hiện nhanh hơn
+      maxPeriod: 5.0, // 🎮 Màn hình nhỏ: Giảm từ 6.0 -> 5.0 để dễ lấy power-up
       selfPositioning: true,
     );
     add(_pickupSpawner);
