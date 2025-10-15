@@ -191,6 +191,9 @@ class Player
       _laserLevel++;
       print('🚀 Laser upgraded to Level $_laserLevel!');
 
+      // ✅ CẬP NHẬT HIỂN THỊ LASER LEVEL TRÊN UI
+      game.updateLaserLevelDisplay(_laserLevel);
+
       // Hiệu ứng visual cho upgrade (optional)
       _showUpgradeEffect();
     } else {

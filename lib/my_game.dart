@@ -227,7 +227,8 @@ class MyGame extends FlameGame
     // 🎯 Position thông minh: Phone để bên trái, Desktop để bên phải
     final anchor = isPhone ? Anchor.topLeft : Anchor.topRight;
     final positionX = isPhone ? sideMargin : (size.x - sideMargin);
-
+    
+    // hiển thị lv laser
     _laserLevelDisplay = TextComponent(
       text: 'LASER LV.1',
       anchor: anchor,
