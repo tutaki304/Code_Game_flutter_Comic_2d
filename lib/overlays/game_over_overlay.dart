@@ -112,7 +112,25 @@ class _GameOverOverlayState extends State<GameOverOverlay> {
                 fontWeight: FontWeight.bold, // Bold để hiệu ứng kịch tính
               ),
             ),
-            const SizedBox(height: 30), // Khoảng cách giữa title và buttons
+            const SizedBox(height: 20), // Khoảng cách giữa title và score
+
+            // ===== FINAL SCORE DISPLAY =====
+            Text(
+              'SCORE: ${widget.game.score}',
+              style: TextStyle(
+                color: Colors.amber, // Màu vàng nổi bật cho điểm
+                fontSize: 36, // Lớn nhưng nhỏ hơn GAME OVER
+                fontWeight: FontWeight.bold,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withOpacity(0.8),
+                    offset: const Offset(2, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 30), // Khoảng cách giữa score và buttons
 
             // ===== PLAY AGAIN BUTTON =====
             TextButton(

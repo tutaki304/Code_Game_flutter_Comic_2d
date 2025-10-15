@@ -38,6 +38,9 @@ class MyGame extends FlameGame
   late TextComponent _scoreDisplay; // Component hiển thị điểm
   late TextComponent _laserLevelDisplay; // Component hiển thị laser level
 
+  // Getter public để truy cập điểm từ overlay
+  int get score => _score;
+
   // Hệ thống chọn màu tàu
   final List<String> playerColors = [
     'blue',
@@ -227,7 +230,7 @@ class MyGame extends FlameGame
     // 🎯 Position thông minh: Phone để bên trái, Desktop để bên phải
     final anchor = isPhone ? Anchor.topLeft : Anchor.topRight;
     final positionX = isPhone ? sideMargin : (size.x - sideMargin);
-    
+
     // hiển thị lv laser
     _laserLevelDisplay = TextComponent(
       text: 'LASER LV.1',
