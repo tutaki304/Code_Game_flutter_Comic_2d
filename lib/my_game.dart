@@ -263,13 +263,13 @@ class MyGame extends FlameGame
     String layoutInfo;
 
     if (isPhone) {
-      deviceType = '📱 PHONE UI';
+      deviceType = '📱 PHONE UI CUA TU';
       layoutInfo = 'Portrait Mode - Laser Level: Top Left';
     } else {
       if (size.x < 1200) {
-        deviceType = '📚 TABLET UI';
+        deviceType = '📚 TABLET UI CUA TU';
       } else {
-        deviceType = '🖥️ DESKTOP UI';
+        deviceType = '🖥️ DESKTOP UI CUA TU';
       }
       layoutInfo = 'Landscape Mode - Laser Level: Top Right';
     }

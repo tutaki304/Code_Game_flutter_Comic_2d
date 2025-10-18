@@ -4,29 +4,27 @@ import 'package:flame/components.dart'; // Flame component system
 import 'package:flame_audio/flame_audio.dart'; // Background music system
 import 'package:flutter_soloud/flutter_soloud.dart'; // High-performance sound effects
 
-/**
- * AudioManager - Dual audio system manager
- * 
- * 🎵 DUAL AUDIO ARCHITECTURE:
- * - flutter_soloud: Sound effects (SFX) - Low latency, high performance
- * - flame_audio: Background music (BGM) - Streaming, loop support
- * 
- * 🔊 FEATURES:
- * - Preloaded sound effects cho zero-latency playback
- * - Separate music/sound toggle controls
- * - Error handling và fallback mechanisms
- * - Memory management với proper cleanup
- * 
- * 🎮 GAME AUDIO EVENTS:
- * - UI: click sounds
- * - Gameplay: laser, hit, explode, collect
- * - Background: looping music track
- * 
- * 🛠️ TECHNICAL NOTES:
- * - SoLoud: Modern audio engine, replaces discontinued soundpool
- * - FlameAudio BGM: Stable cross-platform music playback
- * - Asset preloading: All sounds loaded once trong onLoad()
- */
+/// AudioManager - Dual audio system manager
+/// 
+/// 🎵 DUAL AUDIO ARCHITECTURE:
+/// - flutter_soloud: Sound effects (SFX) - Low latency, high performance
+/// - flame_audio: Background music (BGM) - Streaming, loop support
+/// 
+/// 🔊 FEATURES:
+/// - Preloaded sound effects cho zero-latency playback
+/// - Separate music/sound toggle controls
+/// - Error handling và fallback mechanisms
+/// - Memory management với proper cleanup
+/// 
+/// 🎮 GAME AUDIO EVENTS:
+/// - UI: click sounds
+/// - Gameplay: laser, hit, explode, collect
+/// - Background: looping music track
+/// 
+/// 🛠️ TECHNICAL NOTES:
+/// - SoLoud: Modern audio engine, replaces discontinued soundpool
+/// - FlameAudio BGM: Stable cross-platform music playback
+/// - Asset preloading: All sounds loaded once trong onLoad()
 class AudioManager extends Component {
   // ===============================================
   // 🎛️ AUDIO CONTROL STATE

@@ -1,166 +1,58 @@
-import 'dart:async'; // Async/await support
+// ============================================
+// 📦 IMPORT CÁC THƯ VIỆN CẦN THIẾT
+// ============================================
+import 'dart:async'; // Hỗ trợ async/await cho các hàm bất đồng bộ
 
-import 'package:cosmic_havoc/my_game.dart'; // Truy cập game instance
-import 'package:flame/components.dart'; // Flame components
-import 'package:flame/events.dart'; // Xử lý sự kiện chạm
+import 'package:cosmic_havoc/my_game.dart'; // Truy cập game instance chính
+import 'package:flame/components.dart'; // Các component cơ bản của Flame
+import 'package:flame/events.dart'; // Xử lý sự kiện chạm (touch events)
 
-/**
- * ShootButton - Touch control button cho mobile laser firing
- * 
- * 🎯 CHỨC NĂNG CHÍNH:
- * - Touch-based shooting control cho mobile devices
- * - Press & hold mechanics: Hold để continuous firing
- * - Visual feedback: Button sprite indicates tap area
- * - Responsive controls: Works với different screen sizes
- * 
- * 🎮 CONTROL MECHANICS:
- * - onTapDown: Start continuous laser firing
- * - onTapUp: Stop laser firing (finger lift)
- * - onTapCancel: Stop firing (touch interrupted)
- * - Player.startShooting(): Begins continuous fire cycle
- * - Player.stopShooting(): Ends fire cycle
- * 
- * 📱 MOBILE OPTIMIZATION:
- * - Size: 80x80 pixels (easy to tap)
- * - Touch target: Large enough cho comfortable use
- * - Visual feedback: Clear button sprite cho user guidance
- * - Position: Managed by parent game layout system
- * 
- * 🔫 INTEGRATION với PLAYER:
- * - Calls Player.startShooting() → activates _isShooting flag
- * - Player update loop handles actual laser spawning
- * - Automatic fire rate limiting trong Player component
- * - Laser level system: Uses current player laser level
- * 
- * 🎨 UI DESIGN:
- * - Simple sprite button (shoot_button.png)
- * - No animation effects (keeps performance high)
- * - Clear visual indication of interactive area
- * - Consistent với other UI elements
- */
 class ShootButton extends SpriteComponent
     with
-        HasGameReference<MyGame>, // Truy cập game instance
+        HasGameReference<MyGame>, // Mixin để truy cập game instance
         TapCallbacks {
-  // Xử lý sự kiện chạm
-
-  /**
-   * Constructor - Tạo shoot button với fixed size
-   * 
-   * Size: 80x80 pixels - optimal cho mobile touch targets
-   * Positioning: Handled by parent layout system
-   */
   ShootButton() : super(size: Vector2.all(80));
 
-  // ===============================================
-  // 🔄 INITIALIZATION
-  // ===============================================
-
-  /**
-   * onLoad() - Load button sprite graphic
-   * 
-   * Simple initialization:
-   * 1. Load shoot_button.png từ assets
-   * 2. No animations hoặc effects (performance focused)
-   * 3. Button ready for touch interaction
-   * 
-   * Design principle: Minimal overhead cho responsive controls
-   */
   @override
   FutureOr<void> onLoad() async {
-    // ===== SPRITE LOADING =====
-    sprite = await game.loadSprite('shoot_button.png'); // Load hình ảnh button
+    // ===== TẢI HÌNH ẢNH NÚT BẮN =====
+    // Load sprite 'shoot_button.png' từ assets/images/
+    sprite = await game.loadSprite('shoot_button.png'); // Load texture button
 
-    return super.onLoad();
+    return super.onLoad(); // Gọi hàm onLoad của class cha
   }
 
-  // ===============================================
-  // 👆 TOUCH EVENT HANDLING
-  // ===============================================
-
-  /**
-   * onTapDown() - Handle button press (start shooting)
-   * 
-   * Triggered when: User finger touches button area
-   * Action: Start continuous laser firing
-   * 
-   * Flow: Touch down → Player.startShooting() → _isShooting = true
-   * → Player.update() begins spawning lasers every _fireCooldown
-   */
   @override
   void onTapDown(TapDownEvent event) {
-    super.onTapDown(event);
+    super.onTapDown(event); // Gọi hàm cha để xử lý event chuẩn
 
-    // ===== START CONTINUOUS FIRING =====
-    game.player.startShooting(); // Kích hoạt trạng thái bắn của player
+    // ===== BẮT ĐẦU BẮN LIÊN TỤC =====
+    // Kích hoạt trạng thái bắn của player
+    game.player.startShooting(); // Set player._isShooting = true
   }
 
-  /**
-   * onTapUp() - Handle button release (stop shooting)
-   * 
-   * Triggered when: User lifts finger from button
-   * Action: Stop laser firing
-   * 
-   * Flow: Touch up → Player.stopShooting() → _isShooting = false
-   * → Player.update() stops spawning lasers
-   */
+
   @override
   void onTapUp(TapUpEvent event) {
-    super.onTapUp(event);
+    super.onTapUp(event); // Gọi hàm cha
 
-    // ===== STOP FIRING ON RELEASE =====
-    game.player.stopShooting(); // Deactivate player shooting state
+    // ===== DỪNG BẮN KHI NHẤC TAY =====
+    // Deactivate trạng thái bắn của player
+    game.player.stopShooting(); // Set player._isShooting = false
+
+    // KẾT QUẢ:
+    // - Laser spawning dừng ngay lập tức
+    // - Player có thể tap lại để bắn tiếp
+    // - No lasting effects, clean state
   }
 
-  /**
-   * onTapCancel() - Handle touch interruption (stop shooting)
-   * 
-   * Triggered when: Touch gesture interrupted (drag outside, system interrupt)
-   * Action: Stop laser firing (safety fallback)
-   * 
-   * Purpose: Prevent stuck firing khi touch events disrupted
-   * Examples: Notification pull-down, app switching, drag outside button
-   */
   @override
   void onTapCancel(TapCancelEvent event) {
-    super.onTapCancel(event);
+    super.onTapCancel(event); // Gọi hàm cha
 
-    // ===== SAFETY STOP ON CANCEL =====
-    game.player.stopShooting(); // Đảm bảo dừng bắn khi bị gián đoạn
+    // ===== DỪNG BẮN AN TOÀN KHI BỊ GIÁN ĐOẠN =====
+    // Đảm bảo dừng bắn khi touch bị gián đoạn
+    game.player.stopShooting(); // Set player._isShooting = false
   }
 }
 
-// ===============================================
-// 📝 IMPLEMENTATION NOTES
-// ===============================================
-//
-// 🎮 TOUCH CONTROL DESIGN:
-// - Press & hold: Natural mobile control pattern
-// - Immediate response: No delay between touch và firing
-// - Safety handling: Touch cancel prevents stuck firing
-//
-// 🔫 SHOOTING INTEGRATION:
-// - Player handles actual laser creation/timing
-// - Button only controls shooting state flag
-// - Laser level system automatic (current player level)
-// - Fire rate controlled by Player._fireCooldown
-//
-// 📱 MOBILE UX CONSIDERATIONS:
-// - 80px size: Meets mobile touch target guidelines
-// - Clear visual feedback: Button sprite shows tap area
-// - Reliable events: All touch scenarios handled
-//
-// 🔧 PERFORMANCE OPTIMIZATION:
-// - No visual effects on button (CPU efficient)
-// - Direct method calls (minimal overhead)
-// - Simple sprite (fast rendering)
-//
-// 🎯 ALTERNATIVE CONTROLS:
-// - Desktop: Keyboard spacebar (handled by Player.KeyboardHandler)
-// - Mobile: This touch button
-// - Both can work simultaneously without conflict
-//
-// 🛡️ ERROR HANDLING:
-// - onTapCancel ensures no stuck firing states
-// - Player.stopShooting() is safe to call multiple times
-// - No crash risk từ rapid tap events

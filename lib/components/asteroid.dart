@@ -9,34 +9,32 @@ import 'package:flame/components.dart'; // Flame components cơ bản
 import 'package:flame/effects.dart'; // Hiệu ứng animation
 import 'package:flutter/widgets.dart'; // Flutter widgets
 
-/**
- * Asteroid - Tảng đá không gian có thể phá hủy (kẻ thù trong game)
- * 
- * 🪨 CHỨC NĂNG CHÍNH:
- * - Chướng ngại vật di chuyển với velocity và xoay ngẫu nhiên
- * - Hệ thống nhiều hit: 3 điểm máu, phản hồi visual
- * - Va chạm với Player (game over) và Laser (damage)
- * - Cơ chế tách: Asteroid lớn → 3 mảnh nhỏ hơn
- * - Hệ thống điểm: +1 mỗi hit, +2 bonus khi phá hủy
- * 
- * 🎯 CƠ CHẾ GAMEPLAY:
- * - Wrap màn hình: Cạnh trái/phải wrap qua lại
- * - Dọn dẹp dưới: Tự động xóa khi ra khỏi màn hình
- * - Hiệu ứng knockback: Bị đẩy lùi khi trúng đòn
- * - Scale theo kích thước: Nhỏ hơn = nhanh hơn, ít máu hơn
- * 
- * 💥 CHUỖI PHÁ HỦY:
- * 1. Hiệu ứng nổ (particle bụi)
- * 2. Bonus điểm (+2 điểm)
- * 3. Tách thành 3 mảnh nhỏ hơn (nếu đủ lớn)
- * 4. Phản hồi âm thanh (tiếng nổ)
- * 
- * 🎨 HIỆU ỨNG VISUAL:
- * - Chọn sprite ngẫu nhiên (3 biến thể)
- * - Nhấp nháy trắng khi bị damage
- * - Animation xoay liên tục
- * - Di chuyển theo scale (nhỏ hơn = nhanh hơn)
- */
+/// Asteroid - Tảng đá không gian có thể phá hủy (kẻ thù trong game)
+/// 
+/// 🪨 CHỨC NĂNG CHÍNH:
+/// - Chướng ngại vật di chuyển với velocity và xoay ngẫu nhiên
+/// - Hệ thống nhiều hit: 3 điểm máu, phản hồi visual
+/// - Va chạm với Player (game over) và Laser (damage)
+/// - Cơ chế tách: Asteroid lớn → 3 mảnh nhỏ hơn
+/// - Hệ thống điểm: +1 mỗi hit, +2 bonus khi phá hủy
+/// 
+/// 🎯 CƠ CHẾ GAMEPLAY:
+/// - Wrap màn hình: Cạnh trái/phải wrap qua lại
+/// - Dọn dẹp dưới: Tự động xóa khi ra khỏi màn hình
+/// - Hiệu ứng knockback: Bị đẩy lùi khi trúng đòn
+/// - Scale theo kích thước: Nhỏ hơn = nhanh hơn, ít máu hơn
+/// 
+/// 💥 CHUỖI PHÁ HỦY:
+/// 1. Hiệu ứng nổ (particle bụi)
+/// 2. Bonus điểm (+2 điểm)
+/// 3. Tách thành 3 mảnh nhỏ hơn (nếu đủ lớn)
+/// 4. Phản hồi âm thanh (tiếng nổ)
+/// 
+/// 🎨 HIỆU ỨNG VISUAL:
+/// - Chọn sprite ngẫu nhiên (3 biến thể)
+/// - Nhấp nháy trắng khi bị damage
+/// - Animation xoay liên tục
+/// - Di chuyển theo scale (nhỏ hơn = nhanh hơn)
 class Asteroid extends SpriteComponent // Kế thừa từ component có sprite
     with
         HasGameReference<MyGame> {

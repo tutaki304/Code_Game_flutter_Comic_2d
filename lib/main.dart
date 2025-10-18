@@ -4,7 +4,7 @@ import 'package:cosmic_havoc/overlays/game_over_overlay.dart'; // Màn hình khi
 import 'package:cosmic_havoc/overlays/title_overlay.dart'; // Màn hình chính khi mở game
 import 'package:flame/game.dart'; // Flame game engine
 import 'package:flutter/material.dart'; // Flutter UI framework
-
+//CODE BY TUCODEDAO @tutaki304 
 // Hàm main - điểm bắt đầu của ứng dụng Flutter
 void main() {
   // Tạo instance của game chính
@@ -25,3 +25,5 @@ void main() {
     ], // Overlay sẽ hiển thị đầu tiên (Title screen)
   ));
 }
+
+
