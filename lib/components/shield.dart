@@ -297,62 +297,60 @@ class Shield extends SpriteComponent
   // 💥 XỬ LÝ VA CHẠM
   // ============================================
 
-  /**
-   * onCollision() - Xử lý va chạm với asteroid (phòng thủ tích cực)
-   * 
-   * THAM SỐ:
-   * @param intersectionPoints - Các điểm giao nhau của va chạm
-   * @param other - Component khác đang va chạm với shield
-   * 
-   * LOGIC XỬ LÝ:
-   * 1. Kiểm tra xem object va chạm có phải là Asteroid không
-   * 2. Nếu đúng là Asteroid:
-   *    - Gọi other.takeDamage() để phá hủy asteroid
-   *    - Shield KHÔNG bị damage (bất tử trong 5s)
-   * 3. Nếu không phải Asteroid: Bỏ qua
-   * 
-   * CÁC TRƯỜNG HỢP VA CHẠM:
-   * - Shield vs Asteroid: ✅ Xử lý (phá hủy asteroid)
-   * - Shield vs Player: ❌ Không xảy ra (cùng team)
-   * - Shield vs Pickup: ❌ Không xử lý (không tương tác)
-   * - Shield vs Laser: ❌ Không xử lý (không conflict)
-   * - Shield vs Bomb: ❌ Không xử lý (không tương tác)
-   * 
-   * OFFENSIVE DEFENSE CONCEPT:
-   * Thay vì chỉ chặn (passive blocking), shield CHỦ ĐỘNG PHÁ HỦY
-   * asteroids khi chạm vào. Điều này:
-   * - Làm gameplay thú vị hơn (player có thể aggressive)
-   * - Tạo risk/reward mechanics (lao vào để clear path)
-   * - Shield trở thành vũ khí tấn công tạm thời
-   * - Khuyến khích playstyle chủ động thay vì passive
-   * 
-   * SO SÁNH CƠ CHẾ:
-   * ┌────────────────┬─────────────────┬──────────────────┐
-   * │ Cơ chế         │ Passive Block   │ Active Destroy   │
-   * ├────────────────┼─────────────────┼──────────────────┤
-   * │ Asteroid hit   │ Bounce back     │ Take damage      │
-   * │ Shield damage  │ Durability loss │ No damage        │
-   * │ Playstyle      │ Defensive       │ Aggressive       │
-   * │ Risk/Reward    │ Low risk        │ High risk        │
-   * │ Fun factor     │ Safe but boring │ Exciting         │
-   * └────────────────┴─────────────────┴──────────────────┘
-   * 
-   * VÍ DỤ SỬ DỤNG:
-   * Scenario: Player có shield, bị bao vây bởi 5 asteroids
-   * 
-   * Với Passive Block:
-   * - Player phải né tránh từng asteroid
-   * - Shield chỉ bảo vệ khi va chạm ngẫu nhiên
-   * - Playstyle: Defensive, chờ asteroids đi qua
-   * 
-   * Với Active Destroy (hiện tại):
-   * - Player có thể LAO VÀO cụm asteroids
-   * - Shield phá hủy mọi asteroid va chạm
-   * - Clear path nhanh chóng
-   * - Playstyle: Aggressive, chủ động tấn công
-   * - Risk: Phải lao vào vùng nguy hiểm
-   * - Reward: Clear nhiều asteroids, lấy pickups
-   */
+  /// onCollision() - Xử lý va chạm với asteroid (phòng thủ tích cực)
+  /// 
+  /// THAM SỐ:
+  /// @param intersectionPoints - Các điểm giao nhau của va chạm
+  /// @param other - Component khác đang va chạm với shield
+  /// 
+  /// LOGIC XỬ LÝ:
+  /// 1. Kiểm tra xem object va chạm có phải là Asteroid không
+  /// 2. Nếu đúng là Asteroid:
+  ///    - Gọi other.takeDamage() để phá hủy asteroid
+  ///    - Shield KHÔNG bị damage (bất tử trong 5s)
+  /// 3. Nếu không phải Asteroid: Bỏ qua
+  /// 
+  /// CÁC TRƯỜNG HỢP VA CHẠM:
+  /// - Shield vs Asteroid: ✅ Xử lý (phá hủy asteroid)
+  /// - Shield vs Player: ❌ Không xảy ra (cùng team)
+  /// - Shield vs Pickup: ❌ Không xử lý (không tương tác)
+  /// - Shield vs Laser: ❌ Không xử lý (không conflict)
+  /// - Shield vs Bomb: ❌ Không xử lý (không tương tác)
+  /// 
+  /// OFFENSIVE DEFENSE CONCEPT:
+  /// Thay vì chỉ chặn (passive blocking), shield CHỦ ĐỘNG PHÁ HỦY
+  /// asteroids khi chạm vào. Điều này:
+  /// - Làm gameplay thú vị hơn (player có thể aggressive)
+  /// - Tạo risk/reward mechanics (lao vào để clear path)
+  /// - Shield trở thành vũ khí tấn công tạm thời
+  /// - Khuyến khích playstyle chủ động thay vì passive
+  /// 
+  /// SO SÁNH CƠ CHẾ:
+  /// ┌────────────────┬─────────────────┬──────────────────┐
+  /// │ Cơ chế         │ Passive Block   │ Active Destroy   │
+  /// ├────────────────┼─────────────────┼──────────────────┤
+  /// │ Asteroid hit   │ Bounce back     │ Take damage      │
+  /// │ Shield damage  │ Durability loss │ No damage        │
+  /// │ Playstyle      │ Defensive       │ Aggressive       │
+  /// │ Risk/Reward    │ Low risk        │ High risk        │
+  /// │ Fun factor     │ Safe but boring │ Exciting         │
+  /// └────────────────┴─────────────────┴──────────────────┘
+  /// 
+  /// VÍ DỤ SỬ DỤNG:
+  /// Scenario: Player có shield, bị bao vây bởi 5 asteroids
+  /// 
+  /// Với Passive Block:
+  /// - Player phải né tránh từng asteroid
+  /// - Shield chỉ bảo vệ khi va chạm ngẫu nhiên
+  /// - Playstyle: Defensive, chờ asteroids đi qua
+  /// 
+  /// Với Active Destroy (hiện tại):
+  /// - Player có thể LAO VÀO cụm asteroids
+  /// - Shield phá hủy mọi asteroid va chạm
+  /// - Clear path nhanh chóng
+  /// - Playstyle: Aggressive, chủ động tấn công
+  /// - Risk: Phải lao vào vùng nguy hiểm
+  /// - Reward: Clear nhiều asteroids, lấy pickups
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other); // Gọi hàm cha

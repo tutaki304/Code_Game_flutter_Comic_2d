@@ -1,4 +1,4 @@
-# Báo cáo ngắn gọn dự án: Cosmic Havoc
+# Báo cáo ngắn gọn dự án: Asteroid storm
 
 ## Tổng quan
 - **Thể loại:** Arcade bắn súng không gian 2D, lấy cảm hứng từ Asteroids cổ điển nhưng bổ sung hệ thống nâng cấp, vật phẩm, hiệu ứng hiện đại.
@@ -13,17 +13,18 @@
   - Dễ mở rộng: thêm boss, nhiệm vụ, chế độ chơi mới
 
 ## Công nghệ chính
-- **Flutter 3.x, Dart 3.x:**
+- **Flutter 3.6.0+, Dart 3.6.0+:**
   - Framework UI đa nền tảng, build 1 code chạy Android/iOS/Web/Desktop
   - Hot reload, dễ debug, cộng đồng lớn
-- **Flame Engine:**
+- **Flame Engine 1.23.0:**
   - Game engine cho Flutter, hỗ trợ component, collision, animation, spawn, hiệu ứng
   - ECS (Entity Component System): tách logic, dễ bảo trì
   - SpawnComponent: sinh đối tượng theo thời gian, tối ưu performance
   - Collision detection: va chạm giữa player, asteroid, laser, pickup, shield
-  - Effects: ScaleEffect, ColorEffect, MoveEffect cho animation mượt
-- **flutter_soloud:**
-  - Thư viện âm thanh, phát nhạc nền và sound effect (laser, nổ, nhặt vật phẩm)
+  - Effects: ScaleEffect, ColorEffect, MoveEffect, OpacityEffect cho animation mượt
+- **flutter_soloud 2.0.0:**
+  - Thư viện âm thanh hiệu năng cao, phát nhạc nền và sound effect (laser, nổ, hit, collect, dropcoin)
+  - Hỗ trợ đa âm thanh đồng thời, không lag
 - **Kiến trúc Overlay:**
   - Tách màn hình chính, game over, title thành các overlay riêng, dễ quản lý UI
 - **Ưu điểm kiến trúc:**
@@ -53,15 +54,15 @@ lib/
 ```
 
 ## Gameplay chính
-- Di chuyển: Joystick ảo (góc trái dưới). Bàn phím (desktop) vẫn hỗ trợ.
-- Bắn: Nút bắn (góc phải dưới) – giữ để bắn liên tục. Desktop dùng Spacebar.
-- Thiên thạch: Rơi từ trên xuống, có xoay; va chạm player → Game Over.
-- Điểm số: +1 mỗi hit; bonus khi phá huỷ. Hiển thị phía trên.
-- Vật phẩm (pickup):
-  - Bomb: Kích hoạt bom quét sạch thiên thạch trên màn hình
-  - Laser: Tăng cấp súng (tối đa 10, bắn nhiều tia rộng)
-  - Shield: Khiên bảo vệ tạm thời (chặn va chạm)
-  - Coin: +10 điểm (rơi từ asteroid3)
+- **Di chuyển**: Joystick ảo (góc trái dưới), tốc độ 250 px/s. Bàn phím (WASD/Arrow keys) vẫn hỗ trợ trên desktop.
+- **Bắn**: Nút bắn (góc phải dưới) – giữ để bắn liên tục với cooldown 0.2s. Desktop dùng Spacebar.
+- **Thiên thạch**: Rơi từ trên xuống (tốc độ tỉ lệ nghịch kích thước), có xoay; va chạm player → Game Over. Khi bị phá hủy sẽ tách thành 3 mảnh nhỏ hơn (nếu đủ lớn).
+- **Điểm số**: Chỉ tăng khi thu Coin (+10 điểm). Coin rơi từ mảnh asteroid nhỏ nhất sau khi phá hủy hoàn toàn. Hiển thị phía trên giữa màn hình.
+- **Vật phẩm (pickup)** spawn ngẫu nhiên 2.5-5.0s:
+  - **Bomb**: Kích hoạt bom AOE quét sạch thiên thạch trên màn hình
+  - **Laser**: Tăng cấp súng (tối đa level 10, bắn 1→10 tia tỏa 60°)
+  - **Shield**: Khiên bảo vệ tạm thời (chặn va chạm với asteroid)
+  - **Coin**: +10 điểm (rơi từ mảnh asteroid nhỏ nhất khi bị phá hủy)
 
 ## Điều khiển & HUD
 - Joystick + ShootButton: Tối ưu cho màn hình 360x804 (phone).
@@ -76,10 +77,17 @@ lib/
 - Score/Laser UI tự co giãn theo kích thước thiết bị.
 
 ## Cách chạy nhanh
-- Thiết bị: Android đã kết nối (USB Debugging) hoặc chạy emulator.
-- Lệnh chạy (đã dùng gần nhất):
-  - `flutter run -d <deviceId>`
-- Trong code: Game khởi chạy qua `main.dart` → `MyGame` → `Title Overlay`.
+- **Thiết bị**: Android đã kết nối (USB Debugging, CPH2531) hoặc chạy emulator.
+- **Lệnh chạy**:
+  ```bash
+  flutter run -d <deviceId>
+  # Ví dụ: flutter run -d DMLRS88DH66XEQ5L
+  ```
+- **Dependencies**: Đã cài sẵn trong `pubspec.yaml`:
+  - flame: ^1.23.0
+  - flutter_soloud: ^2.0.0
+  - flame_audio: ^2.10.7 (backup audio system)
+- **Trong code**: Game khởi chạy qua `main.dart` → `MyGame` → `Title Overlay`.
 
 ## Ghi chú kỹ thuật nổi bật
 - Separation of Concerns: Button UI chỉ bật/tắt trạng thái bắn; Player chịu trách nhiệm spawn laser và fire rate.
@@ -326,4 +334,7 @@ if (size.x <= _maxSize / 3) _spawnCoin(); // chỉ mảnh cuối cùng mới rơ
 - Haptic feedback khi bắn/nhặt vật phẩm (mobile).
 
 ---
-Tác giả: tutaki304 
+**Tác giả:** tutaki304 (@tucodedao)  
+**Dự án:** Asteroid Storm (Flutter/Flame Game)  
+**Ngày cập nhật:** Tháng 10/2025  
+**Package name:** cosmic_havoc (tên cũ, có thể đổi sau) 
